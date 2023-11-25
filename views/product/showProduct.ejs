@@ -1,97 +1,109 @@
-<%- include('../inc/header-user.ejs') %>
-<div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1">
-  <table class="table">
-    <thead>
-      <tr>
-        <th scope="col">STT</th>
-        <th scope="col">Tên Sản Phẩm</th>
-        <th scope="col">Ảnh</th>
-        <th scope="col">Gía Bán Hiện Tại</th>
-        <th scope="col">Thao Tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% for (let i = 0; i < list.length; i++) { %>
-      <tr>
-        <th scope="row"><%= i + 1 %></th>
-        <td><%= list[i].name %></td>
-        <td>
-          <img
-            src="<%= list[i].image %>"
-            alt="<%= list[i].name %>"
-            style="max-width: 100px"
-          />
-        </td>
-        <td><%= list[i].discountPrice %></td>
-      </tr>
-      <% } %>
-      <!-- <tr>
-        <th scope="row">1</th>
-        <td>Mark</td>
-        <td>
-          <img
-            style="
-              object-fit: cover;
-              width: 80px;
-              height: 80px;
-              border-radius: 4px;
-            "
-          />
-        </td>
-        <td>@mdo</td>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
 
-        <td>
-          <div>
-            <button>Xóa</button>
-            <button style="margin-left: 10px">Sửa</button>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <th scope="row">1</th>
-        <td>Mark</td>
-        <td>
-          <img
-            style="
-              object-fit: cover;
-              width: 80px;
-              height: 80px;
-              border-radius: 4px;
-            "
-          />
-        </td>
-        <td>@mdo</td>
+    <style></style>
+  </head>
+  <body>
+    <%- include('../inc/header-user.ejs') %>
+    <div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">STT</th>
+            <th scope="col">Tên Sản Phẩm</th>
+            <th scope="col">Ảnh</th>
+            <th scope="col">Gía Bán Hiện Tại</th>
+            <th scope="col">Thao Tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (let i = 0; i < list.length; i++) { %>
+          <tr>
+            <th scope="row"><%= i + 1 %></th>
+            <td><%= list[i].name %></td>
+            <td>
+              <img
+                src="<%= list[i].image %>"
+                alt="<%= list[i].name %>"
+                style="max-width: 100px"
+              />
+            </td>
+            <td><%= list[i].discountPrice %></td>
+            <td>
+              <div class="action">
+                <a href="#">
+                  <span
+                    data-bs-toggle="modal"
+                    data-id="<%= list[i]._id %>"
+                    data-bs-target="#myModal"
+                    class="delete button"
+                    >Xóa</span
+                  >
+                </a>
 
-        <td>
-          <div>
-            <button>Xóa</button>
-            <button style="margin-left: 10px">Sửa</button>
+                <a href="editProduct/<%= list[i]._id %>">
+                  <span class="update button">Sửa</span>
+                </a>
+              </div>
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+      <div class="modal" id="myModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <h4 class="modal-title">Xóa?</h4>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">Bạn Có Chắc Chắn Muốn Xóa Không?</div>
+            <div class="modal-footer">
+              <button id="delete-btn" type="button" class="btn btn-success">
+                Đồng Ý
+              </button>
+              <button
+                type="button"
+                class="btn btn-danger"
+                data-bs-dismiss="modal"
+              >
+                Hủy Bỏ
+              </button>
+            </div>
           </div>
-        </td>
-      </tr>
-      <tr>
-        <th scope="row">1</th>
-        <td>Mark</td>
-        <td>
-          <img
-            style="
-              object-fit: cover;
-              width: 80px;
-              height: 80px;
-              border-radius: 4px;
-            "
-          />
-        </td>
-        <td>@mdo</td>
+        </div>
+      </div>
+      <form
+        method="POST"
+        name="delete-product-form"
+        enctype="multipart/form-data"
+      ></form>
+    </div>
 
-        <td>
-          <div>
-            <button>Xóa</button>
-            <button style="margin-left: 10px">Sửa</button>
-          </div>
-        </td>
-      </tr> -->
-    </tbody>
-  </table>
-</div>
-<%- include('../inc/footer.ejs') %>
+    <%- include('../inc/footer.ejs') %>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var productId;
+        var deleteForm = document.forms["delete-product-form"];
+        $("#myModal").on("show.bs.modal", function (event) {
+          var button = $(event.relatedTarget);
+          productId = button.data("id");
+        });
+        var btnDelete = document.getElementById("delete-btn");
+        btnDelete.onclick = function () {
+          deleteForm.action = "api/product/delete/" + productId;
+          deleteForm.submit();
+        };
+      });
+    </script>
+  </body>
+</html>

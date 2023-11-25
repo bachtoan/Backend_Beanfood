@@ -10,18 +10,26 @@ router.get("/", yeu_cau_dang_nhap);
 router.get("/addProduct", function (req, res, next) {
   res.render("product/addProduct", { title: "Express", req: req });
 });
-router.get("/showProduct", function (req, res, next) {
-  const data = product.dataProductRestaurant(req, res);
+router.get("/showProduct", async function (req, res, next) {
+  const data = await product.dataProductRestaurant(req, res);
   res.render("product/showProduct", {
     list: data,
     req: req,
   });
 });
-router.get("/editProduct", function (req, res, next) {
-  res.render("product/editProduct", { title: "Express", req: req });
+router.get("/editProduct/:id", async function (req, res, next) {
+  const data = await product.editProduct(req, res);
+  res.render("product/editProduct", {
+    title: "Express",
+    req: req,
+    product: data,
+  });
 });
 router.get("/home", function (req, res, next) {
   res.render("home", { title: "Express" });
+});
+router.get("/duyetDon", function (req, res, next) {
+  res.render("order/duyetDon", { title: "Express", req: req });
 });
 router.get("/revenue", function (req, res, next) {
   res.render("revenue/showrevenue", { title: "Express", req: req });
