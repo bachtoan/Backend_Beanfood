@@ -13,7 +13,6 @@ exports.createOrderSuccess = async (req, res, next) => {
     return res.status(500).json({ msg: error.message });
   }
 };
-
 exports.duyetDonHang = async (req, res, next) => {
   const id = req.session.user?._id;
 

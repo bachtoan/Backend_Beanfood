@@ -8,6 +8,7 @@ var apiSlider = require("../controllers/slider.controller");
 var apiComment = require("../controllers/comment.controller");
 var apiRestaurant = require("../controllers/restautant.controller");
 var apiProduct = require("../controllers/product.controller");
+var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -69,7 +70,7 @@ router.post(
 router.post(
   "/product/addProduct",
   upload.single("image"),
-  apiProduct.addProduct
+  apiSanPhamDangDuyet.addProduct
 );
 
 module.exports = router;
