@@ -26,7 +26,11 @@ const historySchame = new mongoose.Schema({
         },
         name: {
             type: String,
-            required: true
+            required: true,
+        },
+        image: {
+            type: String,
+            required: true,
         },
         quantity: {
             type: Number,
