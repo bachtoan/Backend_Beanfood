@@ -8,6 +8,7 @@ var apiSlider = require("../controllers/slider.controller");
 var apiComment = require("../controllers/comment.controller");
 var apiRestaurant = require("../controllers/restautant.controller");
 var apiProduct = require("../controllers/product.controller");
+var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -26,14 +27,16 @@ router.put("/updateorder/:id", apiOder.updateOrder);
 router.delete("/deletebyUid/:id", apiOder.deletebyUid);
 router.get("/order/:userId", apiOder.getOrdersByUser);
 
-
 // lịch sủ mua hàng
 router.post("/history/create", apiHistory.createOrderSuccess);
 router.get("/history", apiHistory.getHistory);
 router.get("/ordersByUser/:userId", apiHistory.getUserHistory);
 router.delete("/history/delete", apiHistory.deleteHistory);
 router.delete("/history/deleteAll", apiHistory.deleteHistoryAll);
-router.put("/update-order-status/:orderId", apiHistory.updateOrderStatusByRestaurant);
+router.put(
+  "/update-order-status/:orderId",
+  apiHistory.updateOrderStatusByRestaurant
+);
 router.put("/user/cancel", apiHistory.cancelOrder);
 router.get("/revenue", apiHistory.getRevenue);
 router.get("/orderStatistics", apiHistory.getOrders);
@@ -50,18 +53,25 @@ router.get("/restaurant/:id", apiRestaurant.getInfoRestaurantById);
 
 router.post("/restaurant/delete/:id", apiRestaurant.deleteRestaurant);
 //products
+router.post("/product/delete/:id", apiProduct.deleteProduct);
 router.get("/product/id/:id", apiProduct.getProduct);
 router.get("/product/suggest", apiProduct.getSuggest);
 router.post("/product/getbyname", apiProduct.getProductByName);
+
 router.get(
   "/product/getProductsInRestaurant/:id",
   apiProduct.getProductInRestaurant
+);
+router.post(
+  "/product/editProduct/:id",
+  upload.single("image"),
+  apiProduct.editDataProduct
 );
 
 router.post(
   "/product/addProduct",
   upload.single("image"),
-  apiProduct.addProduct
+  apiSanPhamDangDuyet.addProduct
 );
 
 module.exports = router;

@@ -1,18 +1,18 @@
-<%- include('../inc/header.ejs') %>
+<%- include('../inc/header-user.ejs') %>
 <div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1">
   <div class="input-form">
     <h3 style="text-align: center">Sửa Sản Phẩm</h3>
     <form
       enctype="multipart/form-data"
       method="POST"
-      action="api/product/editProduct"
+      action="http://localhost:3000/api/product/editProduct/<%= product._id %>"
     >
       <div class="mb-3 mt-4">
         <label class="form-label">Tên Sản Phẩm:</label>
         <input
           class="form-control"
           required
-          placeholder="Nhập tên sản phẩm"
+          placeholder="<%= product.name %>"
           name="name"
         />
       </div>
@@ -22,7 +22,7 @@
           class="form-control"
           required
           type="number"
-          placeholder="Nhập giá gốc"
+          placeholder="<%= product.realPrice %>"
           name="realPrice"
         />
       </div>
@@ -32,7 +32,7 @@
           class="form-control"
           required
           type="number"
-          placeholder="Nhập giá khuyễn mãi"
+          placeholder="<%= product.discountPrice %>"
           name="discountPrice"
         />
       </div>
@@ -46,7 +46,7 @@
             name="category"
             value="tra sua"
             checked
-          />Tra Sua
+          />Trà Sữa
           <label class="form-check-label" for="radio1"></label>
         </div>
         <div class="form-check">
@@ -55,7 +55,7 @@
             class="form-check-input"
             name="category"
             value="com"
-          />Com
+          />Cơm
           <label class="form-check-label" for="radio2"></label>
         </div>
         <div class="form-check">
@@ -64,7 +64,43 @@
             class="form-check-input"
             name="category"
             value="bun"
-          />Bun
+          />Bún
+          <label class="form-check-label"></label>
+        </div>
+        <div class="form-check">
+          <input
+            type="radio"
+            class="form-check-input"
+            name="category"
+            value="ga"
+          />Gà
+          <label class="form-check-label"></label>
+        </div>
+        <div class="form-check">
+          <input
+            type="radio"
+            class="form-check-input"
+            name="category"
+            value="douong"
+          />Đồ uống
+          <label class="form-check-label"></label>
+        </div>
+        <div class="form-check">
+          <input
+            type="radio"
+            class="form-check-input"
+            name="category"
+            value="banhmi"
+          />Bánh mì
+          <label class="form-check-label"></label>
+        </div>
+        <div class="form-check">
+          <input
+            type="radio"
+            class="form-check-input"
+            name="category"
+            value="bo"
+          />Bò
           <label class="form-check-label"></label>
         </div>
       </div>
@@ -79,7 +115,7 @@
           required
           type="number"
           class="form-control"
-          placeholder="So luong trong gio hang"
+          placeholder="<%= product.quantityInStock %>"
           name="quantityInStock"
         />
       </div>
