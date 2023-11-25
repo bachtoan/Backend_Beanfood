@@ -39,6 +39,7 @@ router.put(
 );
 router.put("/user/cancel", apiHistory.cancelOrder);
 router.get("/revenue", apiHistory.getRevenue);
+router.get("/orderStatistics", apiHistory.getOrders);
 //slider
 router.get("/slider/getAll", apiSlider.getSliders);
 //comment
