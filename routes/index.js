@@ -28,9 +28,6 @@ router.get("/editProduct/:id", async function (req, res, next) {
 router.get("/home", function (req, res, next) {
   res.render("home", { title: "Express" });
 });
-router.get("/duyetDon", function (req, res, next) {
-  res.render("order/duyetDon", { title: "Express", req: req });
-});
 router.get("/revenue", function (req, res, next) {
   res.render("revenue/showrevenue", { title: "Express", req: req });
 });

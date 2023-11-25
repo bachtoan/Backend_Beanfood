@@ -46,7 +46,7 @@ exports.createOrder = async (req, res) => {
               productId: req.body.productId,
               name: product.name,
               image: product.image,
-              restaurant:req.body.restaurant,
+              restaurantId:req.body.restaurantId,
               price: product.realPrice,
               quantity: req.body.quantity,
               orderDate: new Date(),
