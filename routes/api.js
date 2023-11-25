@@ -36,6 +36,7 @@ router.delete("/history/deleteAll", apiHistory.deleteHistoryAll);
 router.put("/update-order-status/:orderId", apiHistory.updateOrderStatusByRestaurant);
 router.put("/user/cancel", apiHistory.cancelOrder);
 router.get("/revenue", apiHistory.getRevenue);
+router.get("/orderStatistics", apiHistory.getOrders);
 //slider
 router.get("/slider/getAll", apiSlider.getSliders);
 //comment

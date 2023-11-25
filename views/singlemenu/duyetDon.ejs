@@ -1,0 +1,28 @@
+<%- include('../inc/header-user.ejs') %>
+
+<div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1;">
+  <div>
+    <h2>Duyệt Đơn Hàng Đạt Mõm</h2>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th scope="col">Tên Sản phẩm</th>
+            <th scope="col">Số lượng</th>
+            <th scope="col">Giá</th>
+            <th scope="col">Phương thức thanh toán</th>
+            <th scope="col">Trạng thái</th>
+            <th scope="col">Thời gian</th>
+            <th scope="col">Tổng giá</th>
+          </tr>
+        </thead>
+        <tbody id="orderTableBody">
+          <!-- Dữ liệu sẽ được cập nhật tại đây -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../inc/footer.ejs') %>
+

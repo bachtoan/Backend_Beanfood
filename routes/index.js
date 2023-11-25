@@ -26,7 +26,12 @@ router.get("/home", function (req, res, next) {
 router.get("/revenue", function (req, res, next) {
   res.render("revenue/showrevenue", { title: "Express", req: req });
 });
-
+router.get("/singlemenu", function (req, res, next){
+  res.render("singlemenu/statistics", { title: "Express", req: req});
+});
+router.get("/duyetDon", function (req, res, next){
+  res.render("singlemenu/duyetDon", { title: "Express", req: req});
+});
 router.get("/listproduct", product.getListProduct);
 router.get("/orderstatistics", order.getOrdersWeb);
 
