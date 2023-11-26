@@ -21,15 +21,7 @@
     </table>
   </div>
 </div>
-
-<style>
-  .table-responsive {
-    overflow-x: auto;
-    max-width: auto;
-    margin: auto;
-  }
-</style>
-
+<%- include('../inc/footer.ejs') %>
 <script>
   document.addEventListener('DOMContentLoaded', async function () {
     try {
@@ -54,7 +46,7 @@
                 <option value="0" ${order.status === 0 ? 'selected' : ''}>Chờ xác nhận</option>
                 <option value="1" ${order.status === 1 ? 'selected' : ''}>Đang chuẩn bị</option>
                 <option value="2" ${order.status === 2 ? 'selected' : ''}>Đã giao</option>
-                <option value="3" ${order.status === 3 ? 'selected' : ''}>Đã hủy</option>
+                <option value="3" ${order.status === 3 ? 'selected' : ''}>Hủy Đơn</option>
               </select>
               <button type="submit">Cập nhật</button>
               </div>
