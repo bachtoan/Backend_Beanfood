@@ -55,6 +55,7 @@ router.post("/product/delete/:id", apiProduct.deleteProduct);
 router.get("/product/id/:id", apiProduct.getProduct);
 router.get("/product/suggest", apiProduct.getSuggest);
 router.post("/product/getbyname", apiProduct.getProductByName);
+router.get("/productDanhmuc/:category", apiProduct.getProductDanhMuc);
 
 router.get(
   "/product/getProductsInRestaurant/:id",
