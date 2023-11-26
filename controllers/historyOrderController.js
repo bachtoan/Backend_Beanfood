@@ -67,34 +67,64 @@ exports.deleteHistoryAll = async (req, res) => {
 }
 
 // cập nhật trạng thái đơn hàng
-exports.updateOrderStatusByRestaurant = async (req, res) => {
+exports.getOrdersByRestaurant = async (req, res) => {
+    try {
+      const user = req.session.user;
+      const restaurantId = user._id;
+      const orders = await historyModel.History.find({
+        'products.restaurantId': restaurantId,
+      });
+      res.json(orders);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ msg: 'Đã xảy ra lỗi' });
+    }
+  };
+  
+  exports.updateOrderStatusByRestaurant = async (req, res) => {
     const orderId = req.params.orderId;
     const newStatus = req.body.status;
 
     try {
-        if (![0, 1, 2, 3].includes(newStatus)) {
-            return res.status(400).json({ msg: 'Trạng thái không hợp lệ.' });
-        }
+        // if (![0, 1, 2, 3].includes(newStatus)) {
+        //     return res.status(400).json({ msg: 'Trạng thái không hợp lệ.' });
+        // }
+
         const updatedOrder = await historyModel.History.findByIdAndUpdate(
             orderId,
             { $set: { status: newStatus } },
             { new: true }
         );
+
         if (!updatedOrder) {
             return res.status(404).json({ msg: 'Không tìm thấy đơn hàng' });
         }
-switch (newStatus) {
+
+        let statusMessage = '';
+        switch (newStatus) {
             case 1:
-                return res.json({ msg: 'Đơn hàng đang chuẩn bị.' });
+                statusMessage = 'Đơn hàng đang chuẩn bị.';
+                break;
             case 2:
-                return res.json({ msg: 'Đơn hàng đã giao.' });
-                case 3: 
-                return res.json({msg: "Đơn hàng đã được hủy."})
+                statusMessage = 'Đơn hàng đã giao.';
+                break;
+            case 3:
+                statusMessage = 'Đơn hàng đã được hủy.';
+                break;
             default:
-                return res.json({ msg: 'Chờ xác nhận.' });
+                statusMessage = 'Chờ xác nhận.';
         }
+
+        res.json({ msg: statusMessage });
     } catch (error) {
-        return res.status(500).json({ msg: error.message });
+        console.error('Error:', error);
+
+        // Bắt lỗi cụ thể và trả về mã lỗi và thông điệp
+        if (error.name === 'CastError' && error.kind === 'ObjectId') {
+            return res.status(400).json({ msg: 'ID đơn hàng không hợp lệ.' });
+        }
+
+        res.status(500).json({ msg: 'Đã xảy ra lỗi' });
     }
 };
 
