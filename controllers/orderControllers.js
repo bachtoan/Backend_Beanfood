@@ -56,8 +56,8 @@ exports.createOrder = async (req, res) => {
               res.json(newOrder);
       }
     else{
-      const restaurantId = orders.map(order => order.restaurant);
-      if (restaurantId.includes(req.body.restaurant)) {
+      const restaurantId = orders.map(order => order.restaurantId);
+      if (restaurantId.includes(req.body.restaurantId)) {
         console.log("Giá trị đã trùng lặp trong mảng restaurantNames");
         const order = new Order({
           userId: req.body.userId,
@@ -65,7 +65,7 @@ exports.createOrder = async (req, res) => {
           productId: req.body.productId,
           name: product.name,
           image: product.image,
-          restaurant:req.body.restaurant,
+          restaurantId:req.body.restaurantId,
           price: product.realPrice,
           quantity: req.body.quantity,
           orderDate: new Date(),
