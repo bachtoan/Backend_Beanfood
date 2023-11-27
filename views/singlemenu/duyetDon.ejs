@@ -29,7 +29,9 @@
       const orders = await response.json();
       const tableBody = document.getElementById('orderTableBody');
 
-      orders.forEach(order => {
+      orders
+      .filter(order => order.status !== 3)
+      .forEach(order => {
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${order.address}</td>
