@@ -103,12 +103,14 @@ exports.getOrdersByRestaurant = async (req, res) => {
         let statusMessage = '';
         switch (newStatus) {
             case 1:
-                statusMessage = 'Đơn hàng đang chuẩn bị.';
+                statusMessage = 'Đã xác nhận';
                 break;
             case 2:
-                statusMessage = 'Đơn hàng đã giao.';
+                statusMessage = 'Đơn hàng đang giao.';
                 break;
-            case 3:
+            case 3: 
+                statusMessage = 'Đơn hàng đã giao.'
+            case 4:
                 statusMessage = 'Đơn hàng đã được hủy.';
                 break;
             default:
@@ -143,7 +145,7 @@ exports.cancelOrder = async (req, res) => {
         if (order.status === 0) {
             const updatedOrder = await historyModel.History.findByIdAndUpdate(
                 orderId,
-                { $set: { status: 3 } }, 
+                { $set: { status: 4 } }, 
                 { new: true }
             );
             return res.json({ msg: 'Đơn hàng đã được hủy.' });
@@ -168,7 +170,7 @@ exports.getRevenue = async (req, res) => {
     // Bắt đầu pipeline
     const orders = await historyModel.History.find({
       'products.restaurantId': restaurantId,
-      status: 2,
+      status: 3,
     });
 
     console.log('Orders:', orders);
@@ -206,7 +208,7 @@ exports.getOrders = async (req, res) => {
       const restaurantId = user._id;
       const orders = await historyModel.History.find({
           'products.restaurantId': restaurantId,
-          status: 2,
+          status: 3,
       });
       res.json(orders);
   } catch (error) {

@@ -49,7 +49,7 @@
             </td>
           <td>${totalPrice}</td>
           <td>${order.phuongthucthanhtoan === 'cash' ? 'Thanh toán tiền mặt' : 'Chuyển khoản'}</td>
-          <td>${order.status === 2 ? 'Hoàn thành' : 'Chưa hoàn thành'}</td>
+          <td>${order.status === 3 ? 'Hoàn thành' : 'Chưa hoàn thành'}</td>
           <td>${new Date(order.time).toLocaleString()}</td>
           <td>${order.toltalprice}</td>
         `;
