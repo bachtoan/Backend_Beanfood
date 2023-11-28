@@ -5,11 +5,19 @@ const { error } = require("firebase-functions/logger");
 
 exports.getSuggest = async (req, res, next) => {
   try {
-    let list = await productModel.productModel.find();
+
+    const list = await productModel.productModel.find().populate('restaurantId');
+    const data = list.map((product) => {
+      const restaurantName = product.restaurantId.name;
+      // Thêm tên nhà hàng vào đối tượng sản phẩm
+      return { ...product._doc };
+    });
+
+
     if (list) {
       return res
         .status(200)
-        .json({ data: list, msg: "Lấy dữ liệu thành công" });
+        .json({ data: data, msg: "Lấy dữ liệu thành công" });
     } else {
       return res.status(400).json({ msg: "Không có dữ liệu" });
     }
@@ -60,9 +68,7 @@ exports.dataProductRestaurant = async (req, res, next) => {
 exports.getProductInRestaurant = async (req, res, next) => {
   const restaurantId = req.params.id;
   try {
-    let list = await productModel.productModel.find({
-      restaurantId,
-    });
+    const list = await productModel.productModel.find({ restaurantId }).populate('restaurantId');
     console.log(list);
     if (list) {
       return res

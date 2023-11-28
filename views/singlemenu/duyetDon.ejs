@@ -45,10 +45,10 @@
             <form onsubmit="updateOrderStatus(event, '${order._id}')">
               <div class="update-status-container">
               <select id="statusSelect-${order._id}" data-orderid="${order._id}">
-                <option value="0" ${order.status === 0 ? 'selected' : ''}>Chờ xác nhận</option>
-                <option value="1" ${order.status === 1 ? 'selected' : ''}>Đang chuẩn bị</option>
-                <option value="2" ${order.status === 2 ? 'selected' : ''}>Đã giao</option>
-                <option value="3" ${order.status === 3 ? 'selected' : ''}>Hủy Đơn</option>
+                <option value="1" ${order.status === 1 ? 'selected' : ''}>Đã xác nhận</option>
+                <option value="2" ${order.status === 2 ? 'selected' : ''}>Đang giao</option>
+                <option value="3" ${order.status === 3 ? 'selected' : ''}>Đã giao</option>
+                <option value="4" ${order.status === 4 ? 'selected' : ''}>Đã hủy</option>
               </select>
               <button type="submit">Cập nhật</button>
               </div>
@@ -56,7 +56,7 @@
           </td>
         `;
         tableBody.appendChild(row);
-        if (order.status === 2) {
+        if (order.status === 3) {
         row.style.display = 'none';
       }
       });
@@ -93,11 +93,13 @@
   function getOrderStatusText(status) {
     switch (parseInt(status)) {
       case 1:
-        return 'Đang chuẩn bị';
+        return 'Đã xác nhận';
       case 2:
-        return 'Đã giao';
+        return 'Đang giao';
       case 3:
-        return 'Đã hủy';
+        return 'Đã giao';
+      case 4: 
+        return 'Đã hủy'
       default:
         return 'Chờ xác nhận';
     }
