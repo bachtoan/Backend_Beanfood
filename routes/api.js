@@ -9,6 +9,7 @@ var apiComment = require("../controllers/comment.controller");
 var apiRestaurant = require("../controllers/restautant.controller");
 var apiProduct = require("../controllers/product.controller");
 var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
+var apiFavorite = require("../controllers/favorite.controller");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -33,10 +34,13 @@ router.get("/history", apiHistory.getHistory);
 router.get("/ordersByUser/:userId", apiHistory.getUserHistory);
 router.delete("/history/delete", apiHistory.deleteHistory);
 router.delete("/history/deleteAll", apiHistory.deleteHistoryAll);
-router.put('/updateOrderStatus/:orderId', apiHistory.updateOrderStatusByRestaurant);
+router.put(
+  "/updateOrderStatus/:orderId",
+  apiHistory.updateOrderStatusByRestaurant
+);
 router.put("/user/cancel", apiHistory.cancelOrder);
 router.get("/revenue", apiHistory.getRevenue);
-router.get('/ordersByRestaurant', apiHistory.getOrdersByRestaurant);
+router.get("/ordersByRestaurant", apiHistory.getOrdersByRestaurant);
 router.get("/orderStatistics", apiHistory.getOrders);
 
 // top nhà hàng
@@ -46,6 +50,10 @@ router.get("/slider/getAll", apiSlider.getSliders);
 //comment
 router.get("/comment/getAll", apiComment.getComment);
 router.post("/comment/create", apiComment.postComment);
+
+//favorite
+router.get("/favorite/getFavorite", apiFavorite.getFavorite);
+router.post("/favorite/postFavorite", apiFavorite.postFavorite);
 
 //restaurant
 router.get("/restaurant/getAll", apiRestaurant.getRestaurants);
