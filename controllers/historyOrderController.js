@@ -216,3 +216,74 @@ exports.getOrders = async (req, res) => {
       res.status(500).json({ msg: 'Đã xảy ra lỗi' });
   }
 };
+
+// Hàm lấy danh sách top nhà hàng theo doanh thu
+exports.getTopRestaurants = async (req, res) => {
+    try {
+        const topRestaurants = await historyModel.History.aggregate([
+            { 
+                $match: {
+                    'products.restaurantId': { $exists: true },
+                    status: 3,
+                },
+            },
+            {
+                $unwind: '$products',
+            },
+            { $addFields: { 'products.restaurantId': { $toObjectId: '$products.restaurantId' } } }, // Convert restaurantId to ObjectId
+            {
+                $group: {
+                    _id: '$products.restaurantId',
+                    // totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.price'] } },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'restaurants', // Tên collection nhà hàng
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'restaurantInfo',
+                },
+            },
+            {
+                $unwind: '$restaurantInfo',
+            },
+            {
+                $project: {
+                    role: '$restaurantInfo.role',
+                    restaurantId: '$_id',
+                    restaurantName: '$restaurantInfo.name',
+                    email: '$restaurantInfo.email',
+                    phone: '$restaurantInfo.phone',
+                    timeon: '$restaurantInfo.timeon',
+                    timeoff: '$restaurantInfo.timeoff',
+                    image: '$restaurantInfo.image',
+                    totalRevenue: 1,
+                    _id: 0,
+                },
+            },
+            {
+                $sort: { totalRevenue: -1 },
+            },
+            {
+                $limit: 10, // Chọn số lượng top nhà hàng bạn muốn hiển thị
+            },
+        ]);
+
+        // Log giá trị sau mỗi bước
+        console.log('After Match:', topRestaurants);
+        console.log('After Unwind:', topRestaurants);
+        console.log('After Group:', topRestaurants);
+        console.log('After Lookup:', topRestaurants);
+        console.log('After Unwind:', topRestaurants);
+        console.log('After Project:', topRestaurants);
+        console.log('After Sort:', topRestaurants);
+        console.log('Final Result:', topRestaurants);
+
+        res.status(200).json({data: topRestaurants, msg: "Lấy dữ liệu top nhà hàng thành công"});
+      
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Đã xảy ra lỗi' });
+    }
+};

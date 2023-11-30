@@ -38,6 +38,9 @@ router.put("/user/cancel", apiHistory.cancelOrder);
 router.get("/revenue", apiHistory.getRevenue);
 router.get('/ordersByRestaurant', apiHistory.getOrdersByRestaurant);
 router.get("/orderStatistics", apiHistory.getOrders);
+
+// top nhà hàng
+router.get("/topRestaurants", apiHistory.getTopRestaurants);
 //slider
 router.get("/slider/getAll", apiSlider.getSliders);
 //comment
