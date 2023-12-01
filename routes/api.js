@@ -9,7 +9,7 @@ var apiComment = require("../controllers/comment.controller");
 var apiRestaurant = require("../controllers/restautant.controller");
 var apiProduct = require("../controllers/product.controller");
 var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
-
+var apifavorite = require("../controllers/favoriteController");
 const upload = multer({ storage: multer.memoryStorage() });
 
 //user
@@ -26,6 +26,9 @@ router.delete("/deleteorder/:id", apiOder.deleteOrder);
 router.put("/updateorder/:id", apiOder.updateOrder);
 router.delete("/deletebyUid/:id", apiOder.deletebyUid);
 router.get("/order/:userId", apiOder.getOrdersByUser);
+
+// yêu thích
+router.post("/favorite", apifavorite.toggleLike);
 
 // lịch sủ mua hàng
 router.post("/history/create", apiHistory.createOrderSuccess);

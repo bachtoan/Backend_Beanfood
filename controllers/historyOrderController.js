@@ -1,19 +1,19 @@
 var historyModel = require('../models/history');
-const ProductModel =require('../models/product.model');
+const ProductModel = require('../models/product.model');
 const mongoose = require('mongoose');
 
 
 exports.createOrderSuccess = async (req, res, next) => {
-    console.log("data",req.body);
+    console.log("data", req.body);
     try {
-      const OrderSuccess = new historyModel.History(req.body);
-      let new_OrderSuccess = await OrderSuccess.save();
-      return res.status(200).json({ OrderSuccess: new_OrderSuccess });
+        const OrderSuccess = new historyModel.History(req.body);
+        let new_OrderSuccess = await OrderSuccess.save();
+        return res.status(200).json({ OrderSuccess: new_OrderSuccess });
     } catch (error) {
-      console.log(error);
-      return res.status(500).json({ msg: error.message });
+        console.log(error);
+        return res.status(500).json({ msg: error.message });
     }
-  };
+};
 exports.getHistory = async (req, res) => {
     try {
         const history = await historyModel.History.find();
@@ -32,21 +32,21 @@ exports.getUserHistory = async (req, res) => {
         }
         //
         const userHistory = await historyModel.History.find({ userId });
-        
+
         if (!userHistory || userHistory.length === 0) {
             return res.status(404).json({ msg: 'Không tìm thấy lịch sử mua hàng cho người dùng này' });
         }
         res.json(userHistory);
     } catch (error) {
-    console.error('Lỗi khi truy vấn lịch sử mua hàng:', error);
-    return res.status(500).json({ msg: 'Lỗi máy chủ nội bộ' });
+        console.error('Lỗi khi truy vấn lịch sử mua hàng:', error);
+        return res.status(500).json({ msg: 'Lỗi máy chủ nội bộ' });
     }
 };
 
 exports.deleteHistory = async (req, res) => {
     const orderId = req.params.orderId;
     try {
-        const deleted = await History.findOneAndDelete({orderId});
+        const deleted = await History.findOneAndDelete({ orderId });
         if (!deleted) {
             return res.status(404).json({ msg: 'Không tìm thấy lịch sử mua hàng' });
         }
@@ -69,19 +69,19 @@ exports.deleteHistoryAll = async (req, res) => {
 // cập nhật trạng thái đơn hàng
 exports.getOrdersByRestaurant = async (req, res) => {
     try {
-      const user = req.session.user;
-      const restaurantId = user._id;
-      const orders = await historyModel.History.find({
-        'products.restaurantId': restaurantId,
-      });
-      res.json(orders);
+        const user = req.session.user;
+        const restaurantId = user._id;
+        const orders = await historyModel.History.find({
+            'products.restaurantId': restaurantId,
+        });
+        res.json(orders);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: 'Đã xảy ra lỗi' });
+        console.error(error);
+        res.status(500).json({ msg: 'Đã xảy ra lỗi' });
     }
-  };
-  
-  exports.updateOrderStatusByRestaurant = async (req, res) => {
+};
+
+exports.updateOrderStatusByRestaurant = async (req, res) => {
     const orderId = req.params.orderId;
     const newStatus = req.body.status;
 
@@ -108,7 +108,7 @@ exports.getOrdersByRestaurant = async (req, res) => {
             case 2:
                 statusMessage = 'Đơn hàng đang giao.';
                 break;
-            case 3: 
+            case 3:
                 statusMessage = 'Đơn hàng đã giao.'
             case 4:
                 statusMessage = 'Đơn hàng đã được hủy.';
@@ -145,7 +145,7 @@ exports.cancelOrder = async (req, res) => {
         if (order.status === 0) {
             const updatedOrder = await historyModel.History.findByIdAndUpdate(
                 orderId,
-                { $set: { status: 4 } }, 
+                { $set: { status: 4 } },
                 { new: true }
             );
             return res.json({ msg: 'Đơn hàng đã được hủy.' });
@@ -158,70 +158,70 @@ exports.cancelOrder = async (req, res) => {
 };
 
 exports.getRevenue = async (req, res) => {
-  try {
-    const user = req.session.user;
-    console.log('user', user);
-    if (!user) {
-      return res.status(401).json({ msg: 'Nhà hàng chưa đăng nhập' });
-    }
-    const restaurantId = user._id;
-    console.log('restaurantId', restaurantId);
-
-    // Bắt đầu pipeline
-    const orders = await historyModel.History.find({
-      'products.restaurantId': restaurantId,
-      status: 3,
-    });
-
-    console.log('Orders:', orders);
-
-    if (orders.length === 0) {
-      return res.status(404).json({ msg: 'Không có đơn hàng' });
-    }
-
-    let totalRevenue = 0;
-
-    for (const order of orders) {
-      for (const product of order.products) {
-        const productInfo = await ProductModel.productModel.findById(product.productId);
-
-        if (productInfo) {
-          // Tính toán doanh thu dựa trên thông tin chi tiết của sản phẩm
-          const revenueFromProduct = product.quantity * productInfo.realPrice;
-          totalRevenue += revenueFromProduct;
+    try {
+        const user = req.session.user;
+        console.log('user', user);
+        if (!user) {
+            return res.status(401).json({ msg: 'Nhà hàng chưa đăng nhập' });
         }
-      }
+        const restaurantId = user._id;
+        console.log('restaurantId', restaurantId);
+
+        // Bắt đầu pipeline
+        const orders = await historyModel.History.find({
+            'products.restaurantId': restaurantId,
+            status: 3,
+        });
+
+        console.log('Orders:', orders);
+
+        if (orders.length === 0) {
+            return res.status(404).json({ msg: 'Không có đơn hàng' });
+        }
+
+        let totalRevenue = 0;
+
+        for (const order of orders) {
+            for (const product of order.products) {
+                const productInfo = await ProductModel.productModel.findById(product.productId);
+
+                if (productInfo) {
+                    // Tính toán doanh thu dựa trên thông tin chi tiết của sản phẩm
+                    const revenueFromProduct = product.quantity * productInfo.realPrice;
+                    totalRevenue += revenueFromProduct;
+                }
+            }
+        }
+
+        console.log('Total Revenue:', totalRevenue);
+
+        // Trả kết quả cho client hoặc thực hiện các bước tiếp theo của pipeline
+        res.status(200).json({ totalRevenue });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ msg: 'Đã xảy ra lỗi' });
     }
-
-    console.log('Total Revenue:', totalRevenue);
-
-    // Trả kết quả cho client hoặc thực hiện các bước tiếp theo của pipeline
-    res.status(200).json({ totalRevenue });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: 'Đã xảy ra lỗi' });
-  }
 };
 exports.getOrders = async (req, res) => {
-  try {
-      const user = req.session.user;
-      const restaurantId = user._id;
-      const orders = await historyModel.History.find({
-          'products.restaurantId': restaurantId,
-          status: 3,
-      });
-      res.json(orders);
-  } catch (error) {
-      console.error(error);
-      res.status(500).json({ msg: 'Đã xảy ra lỗi' });
-  }
+    try {
+        const user = req.session.user;
+        const restaurantId = user._id;
+        const orders = await historyModel.History.find({
+            'products.restaurantId': restaurantId,
+            status: 3,
+        });
+        res.json(orders);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Đã xảy ra lỗi' });
+    }
 };
 
 // Hàm lấy danh sách top nhà hàng theo doanh thu
 exports.getTopRestaurants = async (req, res) => {
     try {
         const topRestaurants = await historyModel.History.aggregate([
-            { 
+            {
                 $match: {
                     'products.restaurantId': { $exists: true },
                     status: 3,
@@ -253,11 +253,12 @@ exports.getTopRestaurants = async (req, res) => {
                     role: '$restaurantInfo.role',
                     restaurantId: '$_id',
                     restaurantName: '$restaurantInfo.name',
-                    email: '$restaurantInfo.email',
-                    phone: '$restaurantInfo.phone',
-                    timeon: '$restaurantInfo.timeon',
-                    timeoff: '$restaurantInfo.timeoff',
-                    image: '$restaurantInfo.image',
+                    email: { $ifNull: ['$restaurantInfo.email', '']},
+                    phone: {$ifNull: ['$restaurantInfo.phone', '']},
+                    timeon: { $ifNull: ['$restaurantInfo.timeon', ''] },
+                    timeoff: { $ifNull: ['$restaurantInfo.timeoff', ''] }, 
+                    image: { $ifNull: ['$restaurantInfo.image', ''] },
+                    address: {$ifNull: ['$restaurantInfo.address', '']},
                     totalRevenue: 1,
                     _id: 0,
                 },
@@ -280,8 +281,8 @@ exports.getTopRestaurants = async (req, res) => {
         console.log('After Sort:', topRestaurants);
         console.log('Final Result:', topRestaurants);
 
-        res.status(200).json({data: topRestaurants, msg: "Lấy dữ liệu top nhà hàng thành công"});
-      
+        res.status(200).json({ data: topRestaurants, msg: "Lấy dữ liệu top nhà hàng thành công" });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ msg: 'Đã xảy ra lỗi' });
