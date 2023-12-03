@@ -10,17 +10,32 @@ const favoriteSchema = new mongoose.Schema({
       listFavorite: [
         {
           productId: {
-            type: String,
+            type: mongoose.Schema.ObjectId,
+            ref: "Product",
             required: true,
           },
-          restaurantId: {
+          name: {
             type: String,
-            required: true,
+            
+          },
+          image: {
+            type: String,
+            
+          },
+          realPrice: {
+            type: Number,
+          },
+          description: {
+            type: String,
+          },
+          restaurantId:{
+            type: mongoose.Schema.ObjectId, ref: "restaurantModel"
           },
           isLiked: {
             type: Boolean,
             default: false,
           },
+          likeCount: { type: Number, default: 0 },
         },
       ],
   });

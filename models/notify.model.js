@@ -4,6 +4,7 @@ var db = require("./db");
 const notifySchema = new mongoose.Schema(
   {
     idProduct: { type: mongoose.Schema.ObjectId, ref: "productModel" },
+    
     idUser: { type: mongoose.Schema.ObjectId, ref: "userModel" },
     title: String,
   },

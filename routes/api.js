@@ -29,6 +29,8 @@ router.get("/order/:userId", apiOder.getOrdersByUser);
 
 // yêu thích
 router.post("/favorite", apifavorite.toggleLike);
+router.get("/favorite/getAll", apifavorite.getAllProductsLikes);
+router.get("/favorite/getbyUid/:userId", apifavorite.getListProductFavoritebyUid);
 
 // lịch sủ mua hàng
 router.post("/history/create", apiHistory.createOrderSuccess);

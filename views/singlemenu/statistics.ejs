@@ -32,7 +32,7 @@
       // Cập nhật dữ liệu vào bảng
       const tableBody = document.getElementById('orderTableBody');
       let totalAmount = 0;
-
+      console.log("data:", orders);
       orders.forEach(order => {
         const totalPrice = order.products.reduce((sum, product) => sum + product.price, 0);
         const row = document.createElement('tr');
