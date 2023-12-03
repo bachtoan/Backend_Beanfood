@@ -9,8 +9,8 @@ var apiComment = require("../controllers/comment.controller");
 var apiRestaurant = require("../controllers/restautant.controller");
 var apiProduct = require("../controllers/product.controller");
 var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
-var apiFavorite = require("../controllers/favorite.controller");
 
+var apifavorite = require("../controllers/favoriteController");
 const upload = multer({ storage: multer.memoryStorage() });
 
 //user
@@ -22,11 +22,15 @@ router.post("/users/update/:id", apiU.update);
 
 // đơn hàng
 router.get("/order", apiOder.getOrders);
+
 router.post("/add/order", apiOder.createOrder);
 router.delete("/deleteorder/:id", apiOder.deleteOrder);
 router.put("/updateorder/:id", apiOder.updateOrder);
 router.delete("/deletebyUid/:id", apiOder.deletebyUid);
 router.get("/order/:userId", apiOder.getOrdersByUser);
+
+// yêu thích
+router.post("/favorite", apifavorite.toggleLike);
 
 // lịch sủ mua hàng
 router.post("/history/create", apiHistory.createOrderSuccess);
@@ -50,10 +54,6 @@ router.get("/slider/getAll", apiSlider.getSliders);
 //comment
 router.get("/comment/getAll", apiComment.getComment);
 router.post("/comment/create", apiComment.postComment);
-
-//favorite
-router.get("/favorite/getFavorite", apiFavorite.getFavorite);
-router.post("/favorite/postFavorite", apiFavorite.postFavorite);
 
 //restaurant
 router.get("/restaurant/getAll", apiRestaurant.getRestaurants);
