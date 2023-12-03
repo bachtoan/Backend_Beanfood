@@ -3,6 +3,7 @@ const session = require("express-session");
 const { yeu_cau_dang_nhap } = require("../middleware/checklogin");
 var product = require("../controllers/product.controller");
 var order = require("../controllers/orderControllers");
+const history = require("../controllers/historyOrderController");
 var router = express.Router();
 
 /* GET home page. */
@@ -25,17 +26,33 @@ router.get("/editProduct/:id", async function (req, res, next) {
     product: data,
   });
 });
+router.get("/donhang/:id", async function (req, res, next) {
+  const data = await history.getDonHangChiTiet(req.params.id);
+  console.log(data);
+  res.render("singlemenu/chitietdonhang", {
+    title: "Express",
+    data: data,
+    req: req,
+  });
+
+  // res.render("singlemenu/chitietdonhang", {
+  //   title: "Express",
+  //   data: data,
+  //   req: req,
+  // });
+});
 router.get("/home", function (req, res, next) {
   res.render("home", { title: "Express" });
 });
+
 router.get("/revenue", function (req, res, next) {
   res.render("revenue/showrevenue", { title: "Express", req: req });
 });
-router.get("/singlemenu", function (req, res, next){
-  res.render("singlemenu/statistics", { title: "Express", req: req});
+router.get("/singlemenu", function (req, res, next) {
+  res.render("singlemenu/statistics", { title: "Express", req: req });
 });
-router.get("/duyetDon", function (req, res, next){
-  res.render("singlemenu/duyetDon", { title: "Express", req: req});
+router.get("/duyetDon", function (req, res, next) {
+  res.render("singlemenu/duyetDon", { title: "Express", req: req });
 });
 router.get("/MyProfile", function (req, res, next){
   res.render("myprofile", {title: "Express", req: req});
