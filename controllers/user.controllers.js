@@ -1,5 +1,44 @@
 var userModel = require("../models/users.model");
 const bcrypt = require("bcrypt");
+// const multer = require("multer");
+// const fs = require("fs");
+
+// // Định nghĩa thư mục lưu trữ ảnh
+// const uploadDir = path.join(__dirname, "uploads");
+
+// // Tạo thư mục nếu chưa tồn tại
+// if (!fs.existsSync(uploadDir)) {
+//   fs.mkdirSync(uploadDir);
+// }
+// // Cấu hình Multer để lưu trữ
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, uploadDir);
+//   },
+//   filename: function (req, file, cb) {
+//     // Tạo tên file duy nhất
+//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+//     cb(
+//       null,
+//       file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+//     );
+//   },
+// });
+
+// const upload = multer({ storage: storage });
+
+// // Endpoint để nhận ảnh đại diện
+// app.post("/api/upload-avatar/:userId", upload.single("avatar"), (req, res) => {
+//   try {
+//     const userId = req.params.userId;
+//     const avatarPath = path.join(uploadDir, req.file.filename);
+
+//     res.json({ avatarPath });
+//   } catch (error) {
+//     console.error("Lỗi khi xử lý ảnh đại diện:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 
 exports.listUser = async (req, res, next) => {
   try {
@@ -114,6 +153,3 @@ exports.infoUser = async (req, res, next) => {
     return res.status(404).json({ msg: error.message });
   }
 };
-
-
-
