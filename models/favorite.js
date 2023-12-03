@@ -35,7 +35,6 @@ const favoriteSchema = new mongoose.Schema({
             type: Boolean,
             default: false,
           },
-          likeCount: { type: Number, default: 0 },
         },
       ],
   });
