@@ -28,21 +28,17 @@ exports.toggleLike = async (req, res) => {
     const productIndex = favorite.listFavorite.findIndex((p) => p.productId.equals(productId));
 
     if (!isLiked) {
-      // Hủy thích sản phẩm
       favorite.listFavorite = favorite.listFavorite.filter((p) => {
         if (p.productId.equals(productId)) {
-          // Giảm số lượng tim khi hủy thích
           p.likeCount = Math.max(p.likeCount - 1, 0);
-          return false; // Loại bỏ sản phẩm khỏi danh sách yêu thích
+          return false; 
         }
         return true;
       });
-      // Giảm tổng số lượng tim của sản phẩm
       product.totalLikes = Math.max(totalLikes - 1, 0);
-      product.likeCount = Math.max(product.likeCount - 1, 0); // Cập nhật likeCount ở đây
+      product.likeCount = Math.max(product.likeCount - 1, 0); 
     } else {
       if (productIndex === -1) {
-        // Nếu sản phẩm chưa được thêm vào danh sách yêu thích
         favorite.listFavorite.push({
           productId,
           name,
@@ -53,25 +49,20 @@ exports.toggleLike = async (req, res) => {
           isLiked,
           likeCount: 1,
         });
-        // Tăng tổng số lượng tim của sản phẩm
         product.totalLikes += 1;
-        product.likeCount += 1; // Cập nhật likeCount ở đây
+        product.likeCount += 1; 
       } else {
-        // Nếu sản phẩm đã có trong danh sách yêu thích
         favorite.listFavorite[productIndex].isLiked = isLiked;
-        // Tăng số lượng tim khi thích
         favorite.listFavorite[productIndex].likeCount += 1;
-        // Tăng tổng số lượng tim của sản phẩm
         product.totalLikes += 1;
-        product.likeCount += 1; // Cập nhật likeCount ở đây
+        product.likeCount += 1; 
       }
     }
 
     console.log('Sau khi cập nhật - product:', product);
 
-    // Sử dụng populate để lấy thông tin nhà hàng
     await favorite.populate('listFavorite.restaurantId');
-    console.log('likeCount sau khi cập nhật:', product.likeCount); // Log giá trị likeCount để kiểm tra
+    console.log('likeCount sau khi cập nhật:', product.likeCount); 
 
     await favorite.save();
     await product.save();
@@ -112,10 +103,7 @@ exports.getListProductFavoritebyUid = async (req, res) => {
 
 exports.getLikes = async (req, res) => {
   try {
-    // Lấy danh sách sản phẩm có số lượng like lớn hơn 0
     const productsWithLikes = await Product.productModel.find({ totalLikes: { $gt: 0 } });
-
-    // Trả về danh sách sản phẩm và số lượng like
     res.status(200).json({ data: productsWithLikes, msg: 'Lấy dữ liệu thành công' });
   } catch (error) {
     console.error(error);

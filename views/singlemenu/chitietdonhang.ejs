@@ -1,0 +1,31 @@
+<%- include('../inc/header-user.ejs') %>
+<div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1">
+  <div>
+    <h2>Chi tiết Đơn hàng</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Mã đơn hàng</th>
+          <th>Tên người mua</th>
+          <th>Số điện thoại</th>
+          <th>Thông tin sản phẩm</th>
+          <th>Số lượng</th>
+          <th>Số liền</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row"><%= data._id %></th>
+          <td><%= data.username %></td>
+          <td><%= data.phone %></td>
+          <% for (let i = 0; i < data.product.length; i++) { %>
+
+          <td><%= data.product[i].name %></td>
+          <td><%= data.product[i].quantity %></td>
+          <td><%= data.product[i].price %></td>
+          <% } %>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
