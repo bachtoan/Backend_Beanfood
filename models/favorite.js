@@ -35,7 +35,6 @@ const favoriteSchema = new mongoose.Schema({
             type: Boolean,
             default: false,
           },
-          likeCount: { type: Number, default: 0 },
         },
       ],
   });
@@ -44,3 +43,4 @@ favoriteModel = db.mongoose.model("favoriteModel", favoriteSchema);
 module.exports = {
   favoriteModel,
 };
+
