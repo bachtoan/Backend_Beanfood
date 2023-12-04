@@ -34,7 +34,7 @@ router.post("/favorite", apifavorite.toggleLike);
 router.get("/favorite/getAll", apifavorite.getAllFavorite);
 router.get("/favorite/getbyUid/:userId", apifavorite.getListProductFavoritebyUid);
 router.get("/getLike", apifavorite.getLikes);
-
+router.get('/getTop', apifavorite.getTop);
 // lịch sủ mua hàng
 router.post("/history/create", apiHistory.createOrderSuccess);
 router.get("/history", apiHistory.getHistory);
@@ -46,7 +46,8 @@ router.put(
   apiHistory.updateOrderStatusByRestaurant
 );
 router.put("/user/cancel", apiHistory.cancelOrder);
-router.get("/revenue", apiHistory.getRevenue);
+router.get("/revenue", apiHistory.getTotalRevenue);
+//ép về date
 router.get("/ordersByRestaurant", apiHistory.getOrdersByRestaurant);
 router.get("/orderStatistics", apiHistory.getOrders);
 
