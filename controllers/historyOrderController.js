@@ -2,6 +2,7 @@ var historyModel = require("../models/history");
 const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
+const moment = require('moment');
 
 exports.createOrderSuccess = async (req, res, next) => {
   console.log("data", req.body);
@@ -176,26 +177,21 @@ exports.cancelOrder = async (req, res) => {
   }
 };
 
-exports.getRevenue = async (req, res) => {
+exports.getTotalRevenue = async (req, res) => {
   try {
     const user = req.session.user;
-    console.log("user", user);
     if (!user) {
-      return res.status(401).json({ msg: "Nhà hàng chưa đăng nhập" });
+      return res.status(401).json({ msg: 'Nhà hàng chưa đăng nhập' });
     }
     const restaurantId = user._id;
-    console.log("restaurantId", restaurantId);
 
-    // Bắt đầu pipeline
     const orders = await historyModel.History.find({
-      "products.restaurantId": restaurantId,
+      'products.restaurantId': restaurantId,
       status: 3,
     });
 
-    console.log("Orders:", orders);
-
     if (orders.length === 0) {
-      return res.status(404).json({ msg: "Không có đơn hàng" });
+      return res.status(404).json({ msg: 'Không có đơn hàng' });
     }
 
     let totalRevenue = 0;
@@ -207,22 +203,20 @@ exports.getRevenue = async (req, res) => {
         );
 
         if (productInfo) {
-          // Tính toán doanh thu dựa trên thông tin chi tiết của sản phẩm
           const revenueFromProduct = product.quantity * productInfo.realPrice;
           totalRevenue += revenueFromProduct;
         }
       }
     }
 
-    console.log("Total Revenue:", totalRevenue);
-
-    // Trả kết quả cho client hoặc thực hiện các bước tiếp theo của pipeline
     res.status(200).json({ totalRevenue });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ msg: "Đã xảy ra lỗi" });
+    return res.status(500).json({ msg: 'Đã xảy ra lỗi' });
   }
 };
+
+
 exports.getOrders = async (req, res) => {
   try {
     const user = req.session.user;
@@ -276,7 +270,7 @@ exports.getTopRestaurants = async (req, res) => {
       {
         $project: {
           role: "$restaurantInfo.role",
-          restaurantId: "$_id",
+          _id: "$_id",
           restaurantName: "$restaurantInfo.name",
           email: { $ifNull: ["$restaurantInfo.email", ""] },
           phone: { $ifNull: ["$restaurantInfo.phone", ""] },
@@ -285,7 +279,7 @@ exports.getTopRestaurants = async (req, res) => {
           image: { $ifNull: ["$restaurantInfo.image", ""] },
           address: { $ifNull: ["$restaurantInfo.address", ""] },
           totalRevenue: 1,
-          _id: 0,
+         
         },
       },
       {

@@ -9,7 +9,7 @@ const favoriteSchema = new mongoose.Schema({
       },
       listFavorite: [
         {
-          productId: {
+          _id: {
             type: mongoose.Schema.ObjectId,
             ref: "Product",
             required: true,
