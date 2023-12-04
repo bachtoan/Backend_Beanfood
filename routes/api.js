@@ -48,7 +48,6 @@ router.put(
 router.put("/user/cancel", apiHistory.cancelOrder);
 router.get("/revenue", apiHistory.getTotalRevenue);
 //ép về date
-router.get("/revenue/:date", apiHistory.getDailyRevenue);
 router.get("/ordersByRestaurant", apiHistory.getOrdersByRestaurant);
 router.get("/orderStatistics", apiHistory.getOrders);
 
