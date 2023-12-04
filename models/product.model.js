@@ -10,6 +10,10 @@ const productSchema = new mongoose.Schema(
     realPrice: Number,
     category: String,
     discountPrice: Number,
+    likeCount: {
+      type: Number,
+      default: 0,
+    },
     restaurantId: { type: mongoose.Schema.ObjectId, ref: "restaurantModel" },
   },
   {

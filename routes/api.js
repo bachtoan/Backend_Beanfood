@@ -10,6 +10,7 @@ var apiRestaurant = require("../controllers/restautant.controller");
 var apiProduct = require("../controllers/product.controller");
 var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 
+var apifavorite = require("../controllers/favoriteController");
 const upload = multer({ storage: multer.memoryStorage() });
 
 //user
@@ -21,11 +22,18 @@ router.post("/users/update/:id", apiU.update);
 
 // đơn hàng
 router.get("/order", apiOder.getOrders);
+
 router.post("/add/order", apiOder.createOrder);
 router.delete("/deleteorder/:id", apiOder.deleteOrder);
 router.put("/updateorder/:id", apiOder.updateOrder);
 router.delete("/deletebyUid/:id", apiOder.deletebyUid);
 router.get("/order/:userId", apiOder.getOrdersByUser);
+
+// yêu thích
+router.post("/favorite", apifavorite.toggleLike);
+router.get("/favorite/getAll", apifavorite.getAllFavorite);
+router.get("/favorite/getbyUid/:userId", apifavorite.getListProductFavoritebyUid);
+router.get("/getLike", apifavorite.getLikes);
 
 // lịch sủ mua hàng
 router.post("/history/create", apiHistory.createOrderSuccess);
@@ -33,11 +41,17 @@ router.get("/history", apiHistory.getHistory);
 router.get("/ordersByUser/:userId", apiHistory.getUserHistory);
 router.delete("/history/delete", apiHistory.deleteHistory);
 router.delete("/history/deleteAll", apiHistory.deleteHistoryAll);
-router.put('/updateOrderStatus/:orderId', apiHistory.updateOrderStatusByRestaurant);
+router.put(
+  "/updateOrderStatus/:orderId",
+  apiHistory.updateOrderStatusByRestaurant
+);
 router.put("/user/cancel", apiHistory.cancelOrder);
 router.get("/revenue", apiHistory.getRevenue);
-router.get('/ordersByRestaurant', apiHistory.getOrdersByRestaurant);
+router.get("/ordersByRestaurant", apiHistory.getOrdersByRestaurant);
 router.get("/orderStatistics", apiHistory.getOrders);
+
+// top nhà hàng
+router.get("/topRestaurants", apiHistory.getTopRestaurants);
 //slider
 router.get("/slider/getAll", apiSlider.getSliders);
 //comment

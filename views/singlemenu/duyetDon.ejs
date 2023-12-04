@@ -29,76 +29,86 @@
       const orders = await response.json();
       const tableBody = document.getElementById('orderTableBody');
 
-      orders.forEach(order => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${order.address}</td>
-          <td>${order.products.map(product => `${product.name} x${product.quantity}`).join('<br>')}</td>
-          <td>${order.toltalprice}</td>
-          <td>${order.phuongthucthanhtoan === 'cash' ? 'Thanh toán tiền mặt' : 'Chuyển khoản'}</td>
-          <td>${getOrderStatusText(order.status)}</td>
-          <td>${order.notes}</td>
-          <td>${new Date(order.time).toLocaleString()}</td>
-          <td>
-            <form onsubmit="updateOrderStatus(event, '${order._id}')">
-              <div class="update-status-container">
-              <select id="statusSelect-${order._id}" data-orderid="${order._id}">
-                <option value="0" ${order.status === 0 ? 'selected' : ''}>Chờ xác nhận</option>
-                <option value="1" ${order.status === 1 ? 'selected' : ''}>Đang chuẩn bị</option>
-                <option value="2" ${order.status === 2 ? 'selected' : ''}>Đã giao</option>
-                <option value="3" ${order.status === 3 ? 'selected' : ''}>Hủy Đơn</option>
-              </select>
-              <button type="submit">Cập nhật</button>
-              </div>
-            </form>
-          </td>
-        `;
-        tableBody.appendChild(row);
-        if (order.status === 2) {
-        row.style.display = 'none';
-      }
-      });
+      orders
+        .filter(order => order.status !== 3 && order.status !== 4)
+        .forEach(order => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${order.address}</td>
+            <td>${order.products.map(product => `${product.name} x${product.quantity}`).join('<br>')}</td>
+            <td>${order.toltalprice}</td>
+            <td>${order.phuongthucthanhtoan === 'cash' ? 'Thanh toán tiền mặt' : 'Chuyển khoản'}</td>
+            <td>${getOrderStatusText(order.status)}</td>
+            <td>${order.notes}</td>
+            <td>${new Date(order.time).toLocaleString()}</td>
+            <td>
+              <form onsubmit="updateOrderStatus(event, '${order._id}', '${order.status}')">
+                <div class="update-status-container">
+                  <select id="statusSelect-${order._id}" data-orderid="${order._id}">
+                    <option value="1" ${order.status === 1 ? 'selected' : ''}>Đã xác nhận</option>
+                    <option value="2" ${order.status === 2 ? 'selected' : ''}>Đang giao</option>
+                    <option value="3" ${order.status === 3 ? 'selected' : ''}>Đã giao</option>
+                    <option value="4" ${order.status === 4 ? 'selected' : ''}>Đã hủy</option>
+                  </select>
+                  <button type="submit">Cập nhật</button>
+                </div>
+              </form>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
     } catch (error) {
       console.error('Error fetching or processing data:', error);
     }
   });
 
-  async function updateOrderStatus(event, orderId) {
+  async function updateOrderStatus(event, orderId, currentStatus) {
     event.preventDefault();  // Ngăn chặn sự kiện mặc định của form
     const statusSelect = document.getElementById(`statusSelect-${orderId}`);
     const newStatus = statusSelect.value;
 
-    try {
-      const response = await fetch(`/api/updateOrderStatus/${orderId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+    // Kiểm tra trạng thái mới
+    if (isValidStatusChange(currentStatus, newStatus)) {
+      try {
+        const response = await fetch(`/api/updateOrderStatus/${orderId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
 
-      const result = await response.json();
-      console.log(result);
-      location.reload();
+        const result = await response.json();
+        console.log(result);
+        location.reload();
 
-      const statusCell = document.querySelector(`[data-orderid="${orderId}"]`);
-      statusCell.innerHTML = getOrderStatusText(newStatus);
-    } catch (error) {
-      console.error('Error updating order status:', error);
+        const statusCell = document.querySelector(`[data-orderid="${orderId}"]`);
+        statusCell.innerHTML = getOrderStatusText(newStatus);
+      } catch (error) {
+        console.error('Lỗi cập nhật trạng thái đơn hàng:', error);
+      }
+    } else {
+      alert('Trạng thái không được duyệt ngược.');
     }
+  }
+
+  function isValidStatusChange(currentStatus, newStatus) {
+    // Đảm bảo rằng trạng thái mới lớn hơn hoặc bằng trạng thái hiện tại
+    return parseInt(newStatus) >= parseInt(currentStatus);
   }
 
   function getOrderStatusText(status) {
     switch (parseInt(status)) {
       case 1:
-        return 'Đang chuẩn bị';
+        return 'Đã xác nhận';
       case 2:
-        return 'Đã giao';
+        return 'Đang giao';
       case 3:
+        return 'Đã giao';
+      case 4:
         return 'Đã hủy';
       default:
         return 'Chờ xác nhận';
     }
   }
 </script>
-
