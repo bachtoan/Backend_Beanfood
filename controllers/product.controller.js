@@ -5,14 +5,14 @@ const { error } = require("firebase-functions/logger");
 
 exports.getSuggest = async (req, res, next) => {
   try {
-
-    const list = await productModel.productModel.find().populate('restaurantId');
+    const list = await productModel.productModel
+      .find()
+      .populate("restaurantId");
     const data = list.map((product) => {
       const restaurantName = product.restaurantId.name;
       // Thêm tên nhà hàng vào đối tượng sản phẩm
       return { ...product._doc };
     });
-
 
     if (list) {
       return res
@@ -68,7 +68,9 @@ exports.dataProductRestaurant = async (req, res, next) => {
 exports.getProductInRestaurant = async (req, res, next) => {
   const restaurantId = req.params.id;
   try {
-    const list = await productModel.productModel.find({ restaurantId }).populate('restaurantId');
+    const list = await productModel.productModel
+      .find({ restaurantId })
+      .populate("restaurantId");
     console.log(list);
     if (list) {
       return res
@@ -191,4 +193,7 @@ exports.getProductDanhMuc = async (req, res, next) => {
   } catch (error) {
     return res.status(204).json({ msg: error.message });
   }
+};
+exports.getRevenue = async (req, res, next) => {
+  res.render("revenue/adminRevenue", { req: req });
 };

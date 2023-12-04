@@ -206,7 +206,7 @@ exports.getProfile = async (req, res, next) => {
     const restaurant = await restaurantModel.restaurantModel.findById(
       restaurantId
     );
-    res.render("restaurant/resProfile", { req: req });
+    res.render("restaurant/resProfile", { req: req, restaurant: restaurant });
   } catch (error) {
     console.error("Lỗi khi lấy thông tin nhà hàng:", error);
     res

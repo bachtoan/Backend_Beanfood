@@ -55,10 +55,11 @@ router.get("/singlemenu", function (req, res, next) {
 router.get("/duyetDon", function (req, res, next) {
   res.render("singlemenu/duyetDon", { title: "Express", req: req });
 });
-router.get("/MyProfile", function (req, res, next){
-  res.render("myprofile", {title: "Express", req: req});
-})
+router.get("/MyProfile", function (req, res, next) {
+  res.render("myprofile", { title: "Express", req: req });
+});
 router.get("/listproduct", product.getListProduct);
+router.get("/adminRevenue", product.getRevenue);
 router.get("/orderstatistics", order.getOrdersWeb);
 router.get("/censorship", sanPhamDangDuyet.getListProduct);
 router.get("/censorship/duyet/:id", sanPhamDangDuyet.duyet);
