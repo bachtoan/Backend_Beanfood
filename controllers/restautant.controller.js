@@ -71,22 +71,43 @@ exports.deleteRestaurant = async (req, res, next) => {
 
 // for website
 exports.webregister = async (req, res, next) => {
-  console.log(req.body);
-  if (req.body.password != req.body.rePassword) {
-    return res.status(500).json({ msg: "Mật khẩu nhập lại không đúng" });
-  } else {
-    try {
-      const salt = await bcrypt.genSalt(10);
-      const restaurant = new restaurantModel.restaurantModel(req.body);
-      restaurant.password = await bcrypt.hash(req.body.password, salt);
-      await restaurant.generateAuthToken();
-      let new_u = await restaurant.save();
-      console.log(new_u);
-      res.redirect("/");
-    } catch (error) {
-      console.log(error);
-      res.redirect("/");
-    }
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const restaurant = new restaurantModel.restaurantModel(req.body);
+    restaurant.password = await bcrypt.hash(req.body.password, salt);
+    await restaurant.generateAuthToken();
+    let new_u = await restaurant.save();
+    console.log(new_u);
+    res.redirect("/");
+  } catch (error) {
+    console.log(error);
+    res.redirect("/");
+  }
+};
+
+exports.checkRegister = async (req, res, next) => {
+  const { account, email } = req.body;
+
+  try {
+    // Kiểm tra xem tài khoản đã tồn tại chưa
+    const existingUser = await restaurantModel.restaurantModel.findOne({
+      account,
+    });
+
+    // Kiểm tra xem email đã tồn tại chưa
+    const existingEmail = await restaurantModel.restaurantModel.findOne({
+      email,
+    });
+
+    const result = {
+      accountExists: !!existingUser,
+      emailExists: !!existingEmail,
+    };
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra đăng ký:", error);
+    res.status(500).json({ error: "Có lỗi khi kiểm tra đăng ký." });
   }
 };
 
@@ -129,15 +150,41 @@ exports.weblogout = async (req, res, next) => {
     }
   });
 };
+
 exports.getListRestaurant = async (req, res, next) => {
+  const ITEMS_PER_PAGE = 10;
   try {
-    let list = await restaurantModel.restaurantModel.find();
-    console.log(list);
-    res.render("restaurant/res", { list: list, req: req });
+    const page = +req.query.page || 1;
+    const restaurants = await restaurantModel.restaurantModel
+      .find()
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+
+    const currentDate = new Date();
+    restaurants.forEach((restaurant) => {
+      const createdAtDate = new Date(restaurant.createdAt);
+      const timeDifference = currentDate - createdAtDate;
+      const daysDifference = timeDifference / (1000 * 3600 * 24);
+      restaurant.daysSinceCreation = Math.round(daysDifference);
+    });
+
+    const totalRestaurants =
+      await restaurantModel.restaurantModel.countDocuments();
+
+    const totalPages = Math.ceil(totalRestaurants / ITEMS_PER_PAGE);
+
+    res.render("restaurant/res", {
+      list: restaurants,
+      req: req,
+      currentPage: page,
+      totalPages: totalPages,
+    });
   } catch (error) {
     res.redirect("/", { req: req });
   }
 };
+
 exports.searchRestaurant = async (req, res, next) => {
   console.log(req.query.name);
   try {
@@ -151,5 +198,19 @@ exports.searchRestaurant = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     res.redirect("/"); // Nếu có lỗi, chuyển hướng về trang chủ
-  };
+  }
+};
+exports.getProfile = async (req, res, next) => {
+  try {
+    const restaurantId = req.params.id;
+    const restaurant = await restaurantModel.restaurantModel.findById(
+      restaurantId
+    );
+    res.render("restaurant/resProfile", { req: req });
+  } catch (error) {
+    console.error("Lỗi khi lấy thông tin nhà hàng:", error);
+    res
+      .status(500)
+      .json({ message: "Đã xảy ra lỗi khi lấy thông tin nhà hàng" });
+  }
 };

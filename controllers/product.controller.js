@@ -173,13 +173,15 @@ exports.getListProduct = async (req, res, next) => {
   }
 };
 
-// lấy theo danh mục 
+// lấy theo danh mục
 exports.getProductDanhMuc = async (req, res, next) => {
   try {
     const nameDanhMuc = req.params.category;
-    const products = await productModel.productModel.find({category: nameDanhMuc});
-    console.log("đạt ngu",products);
-    return res.status(200).json({products});
+    const products = await productModel.productModel.find({
+      category: nameDanhMuc,
+    });
+    console.log("đạt ngu", products);
+    return res.status(200).json({ products });
   } catch (error) {
     return res.status(204).json({ msg: error.message });
   }

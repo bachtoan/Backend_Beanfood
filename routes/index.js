@@ -2,6 +2,7 @@ var express = require("express");
 const session = require("express-session");
 const { yeu_cau_dang_nhap } = require("../middleware/checklogin");
 var product = require("../controllers/product.controller");
+var sanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 var order = require("../controllers/orderControllers");
 var router = express.Router();
 
@@ -31,13 +32,14 @@ router.get("/home", function (req, res, next) {
 router.get("/revenue", function (req, res, next) {
   res.render("revenue/showrevenue", { title: "Express", req: req });
 });
-router.get("/singlemenu", function (req, res, next){
-  res.render("singlemenu/statistics", { title: "Express", req: req});
+router.get("/singlemenu", function (req, res, next) {
+  res.render("singlemenu/statistics", { title: "Express", req: req });
 });
-router.get("/duyetDon", function (req, res, next){
-  res.render("singlemenu/duyetDon", { title: "Express", req: req});
+router.get("/duyetDon", function (req, res, next) {
+  res.render("singlemenu/duyetDon", { title: "Express", req: req });
 });
 router.get("/listproduct", product.getListProduct);
 router.get("/orderstatistics", order.getOrdersWeb);
-
+router.get("/censorship", sanPhamDangDuyet.getListProduct);
+router.get("/censorship/duyet/:id", sanPhamDangDuyet.duyet);
 module.exports = router;

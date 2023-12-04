@@ -17,7 +17,7 @@ exports.yeu_cau_dang_nhap = (req, res, next) => {
   } else {
     console.log("chưa đăng nhập");
     return res.render("authorize/authorize", {
-      message: "Bạn phải đăng nhập để sử dụng chức năng này",
+      message: "",
       req: req,
     });
   }

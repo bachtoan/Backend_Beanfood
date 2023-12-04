@@ -6,11 +6,21 @@
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
-        <li class="breadcrumb-item active">Danh sách nhà hàng</li>  
+        <li class="breadcrumb-item active">Danh sách nhà hàng</li>
       </ol>
 
-      <form class="d-flex ms-auto col-4 mb-2" action="/res/listrestaurant/search" method="get">
-        <input class="form-control me-2" type="text" placeholder="Search" aria-label="Search" name="name">
+      <form
+        class="d-flex ms-auto col-4 mb-2"
+        action="/res/listrestaurant/search"
+        method="get"
+      >
+        <input
+          class="form-control me-2"
+          type="text"
+          placeholder="Search"
+          aria-label="Search"
+          name="name"
+        />
         <button class="btn btn-primary text-white" type="submit">Search</button>
       </form>
       <table class="table">
@@ -20,29 +30,49 @@
             <th scope="col">Nhà hàng</th>
             <th scope="col">Email</th>
             <th scope="col">Liên hệ</th>
-            <th scope="col">Mở cửa</th>
-            <th scope="col">Đóng cửa</th>
             <th scope="col">Ảnh</th>
             <th scope="col">Địa chỉ</th>
+            <th scope="col">Hoạt động</th>
           </tr>
         </thead>
         <tbody>
           <% for (let i = 0; i < list.length; i++) { %>
-            <tr>
-              <th scope="row"><%= i + 1 %></th>
-              <td><%= list[i].name %></td>
-              <td><%= list[i].email %></td>
-              <td><%= list[i].phone %></td>
-              <td><%= list[i].timeon %></td>
-              <td><%= list[i].timeoff %></td>
-              <td><img src="<%= list[i].image %>" alt="<%= list[i].name %>" style="max-width: 100px;"></td>
-              <td><%= list[i].address %></td>
-            </tr>
+          <tr>
+            <th scope="row"><%= i + 1 %></th>
+            <td>
+              <a href="/res/profile/<%= list[i]._id %>">
+                <%= list[i].name %>
+              </a>
+            </td>
+            <td><%= list[i].email %></td>
+            <td><%= list[i].phone %></td>
+            <td>
+              <img
+                src="<%= list[i].image %>"
+                alt="<%= list[i].name %>"
+                style="max-width: 100px"
+              />
+            </td>
+            <td><%= list[i].address %></td>
+            <td><%= list[i].daysSinceCreation %> ngày</td>
+          </tr>
           <% } %>
         </tbody>
       </table>
     </nav>
+    <nav class="pagination">
+      <ul class="pagination">
+        <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link" href="/res/listrestaurant?page=<%= i %>"
+            ><%= i %></a
+          >
+        </li>
+        <% } %>
+      </ul>
+    </nav>
   </div>
   <!-- End Page Title -->
 </main>
+
 <%- include('../inc/footer.ejs') %>
