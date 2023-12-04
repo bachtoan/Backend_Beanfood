@@ -56,7 +56,10 @@ router.get("/duyetDon", function (req, res, next) {
 });
 router.get("/MyProfile", function (req, res, next){
   res.render("myprofile", {title: "Express", req: req});
-})
+});
+router.get("/Favorite", function (req, res, next){
+  res.render("favorite/favorites", {title: "Express", req: req});
+});
 router.get("/listproduct", product.getListProduct);
 router.get("/orderstatistics", order.getOrdersWeb);
 
