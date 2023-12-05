@@ -6,10 +6,8 @@ const productSchema = new mongoose.Schema(
     name: String,
     image: String,
     description: String,
-    quantityInStock: Number,
     realPrice: Number,
     category: String,
-    discountPrice: Number,
     restaurantId: { type: mongoose.Schema.ObjectId, ref: "restaurantModel" },
   },
   {
