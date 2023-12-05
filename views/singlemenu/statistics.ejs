@@ -17,7 +17,6 @@
     </table>
   </div>
 </div>
-<%- include('../inc/footer.ejs') %>
 
 <script>
   document.addEventListener("DOMContentLoaded", async function () {
@@ -25,17 +24,10 @@
       // Fetch danh sách hóa đơn từ máy chủ khi trang được tải
       const response = await fetch("/api/orderStatistics");
       const orders = await response.json();
-      // Cập nhật dữ liệu vào bảng
       const tableBody = document.getElementById("orderTableBody");
       let totalAmount = 0;
-      console.log("data:", orders);
-      orders.forEach(order => {
-        const totalPrice = order.products.reduce((sum, product) => sum + product.price, 0);
-        const row = document.createElement('tr');
-      
-      console.log(orders);
-      
-      orders.forEach((order) => {
+
+      orders.forEach((order, index) => {
         const totalPrice = order.products.reduce(
           (sum, product) => sum + product.price,
           0
@@ -44,20 +36,13 @@
         row.innerHTML = `
         <td>
             <ul>
-              ${order.products
-                .map((product, index) => `<li>${index + 1}</li>`)
-                .join("")}
+              <li>${++index}</li>
             </ul>
           </td>
           <td>
             <ul>
+               <a href="/donhang/${order._id}"><li>${order._id}</li></a>
 
-            ${order.products
-              .map(
-                (product) =>
-                  `<a href="/donhang/${order._id}"><li>${order._id}</li></a>`
-              )
-              .join("")}
             </ul>
             </td>
 
@@ -66,8 +51,6 @@
         `;
         tableBody.appendChild(row);
       });
-    });
-    
     } catch (error) {
       console.error("Error fetching or processing data:", error);
     }

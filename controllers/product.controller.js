@@ -6,11 +6,10 @@ const { error } = require("firebase-functions/logger");
 exports.getSuggest = async (req, res, next) => {
   try {
     const list = await productModel.productModel
-      .find()
+      .find({ isHide: false })
       .populate("restaurantId");
     const data = list.map((product) => {
       const restaurantName = product.restaurantId.name;
-      // Thêm tên nhà hàng vào đối tượng sản phẩm
       return { ...product._doc };
     });
 
@@ -26,12 +25,16 @@ exports.getSuggest = async (req, res, next) => {
   }
 };
 
-exports.deleteProduct = async (req, res, next) => {
+exports.ngungKinhDoanhProduct = async (req, res, next) => {
   const id = req.params.id;
+  const sp = await productModel.productModel.findById({ _id: id });
   try {
-    const product = await productModel.productModel.findByIdAndDelete({
-      _id: id,
-    });
+    const product = await productModel.productModel.findByIdAndUpdate(
+      {
+        _id: id,
+      },
+      { isHide: !sp.isHide }
+    );
 
     if (!product) {
       return res.status(204).json({ msg: "Sản phẩm không tồn tại" });
@@ -54,7 +57,6 @@ exports.dataProductRestaurant = async (req, res, next) => {
     let list = await productModel.productModel.find({
       restaurantId: id,
     });
-    console.log(list);
     if (list) {
       return list;
     } else {
@@ -69,9 +71,8 @@ exports.getProductInRestaurant = async (req, res, next) => {
   const restaurantId = req.params.id;
   try {
     const list = await productModel.productModel
-      .find({ restaurantId })
+      .find({ restaurantId, isHide: false })
       .populate("restaurantId");
-    console.log(list);
     if (list) {
       return res
         .status(200)
@@ -101,6 +102,7 @@ exports.getProductByName = async (req, res, next) => {
   try {
     const products = await productModel.productModel.find({
       name: { $regex: productName, $options: "i" },
+      isHide: false,
     });
 
     if (products.length === 0) {
@@ -171,8 +173,9 @@ exports.addProduct = async (req, res, next) => {
 
 exports.getListProduct = async (req, res, next) => {
   try {
-    const products = await productModel.productModel.find();
-    console.log(products);
+    const products = await productModel.productModel.find({
+      isHide: false,
+    });
     res.render("product/listProduct", { list: products, req: req });
   } catch (error) {
     return res.status(204).json({ msg: error.message });
@@ -185,8 +188,8 @@ exports.getProductDanhMuc = async (req, res, next) => {
     const nameDanhMuc = req.params.category;
     const products = await productModel.productModel.find({
       category: nameDanhMuc,
+      isHide: false,
     });
-    console.log("đạt ngu", products);
     return res.status(200).json({ products });
   } catch (error) {
     return res.status(204).json({ msg: error.message });

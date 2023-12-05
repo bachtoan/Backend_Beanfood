@@ -10,7 +10,7 @@
           <th>Số điện thoại</th>
           <th>Thông tin sản phẩm</th>
           <th>Số lượng</th>
-          <th>Số liền</th>
+          <th>Số tiền</th>
         </tr>
       </thead>
       <tbody>
@@ -22,8 +22,8 @@
 
           <td><%= data.product[i].name %></td>
           <td><%= data.product[i].quantity %></td>
-          <td><%= data.product[i].price %></td>
           <% } %>
+          <td><%= data.totalPrice %></td>
         </tr>
       </tbody>
     </table>

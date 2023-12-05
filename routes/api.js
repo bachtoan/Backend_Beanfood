@@ -32,10 +32,12 @@ router.get("/order/:userId", apiOder.getOrdersByUser);
 // yêu thích
 router.post("/favorite", apifavorite.toggleLike);
 router.get("/favorite/getAll", apifavorite.getAllFavorite);
-router.get("/favorite/getbyUid/:userId", apifavorite.getListProductFavoritebyUid);
+router.get(
+  "/favorite/getbyUid/:userId",
+  apifavorite.getListProductFavoritebyUid
+);
 router.get("/getLike", apifavorite.getLikes);
-router.get('/getTop', apifavorite.getTop);
-// lịch sủ mua hàng
+router.get("/getTop", apifavorite.getTop);
 router.post("/history/create", apiHistory.createOrderSuccess);
 router.get("/history", apiHistory.getHistory);
 router.get("/ordersByUser/:userId", apiHistory.getUserHistory);
@@ -66,7 +68,7 @@ router.get("/restaurant/:id", apiRestaurant.getInfoRestaurantById);
 
 router.post("/restaurant/delete/:id", apiRestaurant.deleteRestaurant);
 //products
-router.post("/product/delete/:id", apiProduct.deleteProduct);
+router.post("/product/delete/:id", apiProduct.ngungKinhDoanhProduct);
 router.get("/product/id/:id", apiProduct.getProduct);
 router.get("/product/suggest", apiProduct.getSuggest);
 router.post("/product/getbyname", apiProduct.getProductByName);

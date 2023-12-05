@@ -18,6 +18,7 @@
             <th scope="col">Ảnh</th>
             <th scope="col">Gía Bán Hiện Tại</th>
             <th scope="col">Thao Tác</th>
+            <th scope="col">Trạng Thái</th>
           </tr>
         </thead>
         <tbody>
@@ -32,23 +33,30 @@
                 style="max-width: 100px"
               />
             </td>
-            <td><%= list[i].discountPrice %></td>
+            <td><%= list[i].realPrice %></td>
             <td>
               <div class="action">
                 <a href="#">
-                  <span
-                    data-bs-toggle="modal"
-                    data-id="<%= list[i]._id %>"
-                    data-bs-target="#myModal"
-                    class="delete button"
-                    >Xóa</span
-                  >
+                  <button>
+                    <span
+                      data-bs-toggle="modal"
+                      data-id="<%= list[i]._id %>"
+                      data-bs-target="#myModal"
+                      class="delete button"
+                    >
+                      <%= list[i].isHide ? 'Khôi Phục Lại' :'Ngừng Kinh Doanh'
+                      %></span
+                    >
+                  </button>
                 </a>
 
                 <a href="editProduct/<%= list[i]._id %>">
-                  <span class="update button">Sửa</span>
+                  <button><span class="update button">Sửa</span></button>
                 </a>
               </div>
+            </td>
+            <td>
+              <%= list[i].isHide ? 'Ngừng Kinh Doanh' :'Đang Hoạt Động' %>
             </td>
           </tr>
           <% } %>
@@ -59,14 +67,16 @@
           <div class="modal-content">
             <!-- Modal Header -->
             <div class="modal-header">
-              <h4 class="modal-title">Xóa?</h4>
+              <h4 class="modal-title">Ngừng Kinh Doanh?</h4>
               <button
                 type="button"
                 class="btn-close"
                 data-bs-dismiss="modal"
               ></button>
             </div>
-            <div class="modal-body">Bạn Có Chắc Chắn Muốn Xóa Không?</div>
+            <div class="modal-body">
+              Bạn Có Chắc Chắn Muốn Ngừng kinh Doanh ?
+            </div>
             <div class="modal-footer">
               <button id="delete-btn" type="button" class="btn btn-success">
                 Đồng Ý

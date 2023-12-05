@@ -2,7 +2,7 @@ var historyModel = require("../models/history");
 const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
-const moment = require('moment');
+const moment = require("moment");
 
 exports.createOrderSuccess = async (req, res, next) => {
   console.log("data", req.body);
@@ -26,6 +26,7 @@ exports.getDonHangChiTiet = async (id) => {
     _id: data?._id,
     username,
     phone,
+    totalPrice: data.toltalprice,
   };
   return dataConcat;
 };
@@ -181,17 +182,17 @@ exports.getTotalRevenue = async (req, res) => {
   try {
     const user = req.session.user;
     if (!user) {
-      return res.status(401).json({ msg: 'Nhà hàng chưa đăng nhập' });
+      return res.status(401).json({ msg: "Nhà hàng chưa đăng nhập" });
     }
     const restaurantId = user._id;
 
     const orders = await historyModel.History.find({
-      'products.restaurantId': restaurantId,
+      "products.restaurantId": restaurantId,
       status: 3,
     });
 
     if (orders.length === 0) {
-      return res.status(404).json({ msg: 'Không có đơn hàng' });
+      return res.status(404).json({ msg: "Không có đơn hàng" });
     }
 
     let totalRevenue = 0;
@@ -212,10 +213,9 @@ exports.getTotalRevenue = async (req, res) => {
     res.status(200).json({ totalRevenue });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ msg: 'Đã xảy ra lỗi' });
+    return res.status(500).json({ msg: "Đã xảy ra lỗi" });
   }
 };
-
 
 exports.getOrders = async (req, res) => {
   try {
@@ -279,7 +279,6 @@ exports.getTopRestaurants = async (req, res) => {
           image: { $ifNull: ["$restaurantInfo.image", ""] },
           address: { $ifNull: ["$restaurantInfo.address", ""] },
           totalRevenue: 1,
-         
         },
       },
       {

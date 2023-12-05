@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema(
     description: String,
     realPrice: Number,
     category: String,
-    discountPrice: Number,
+    isHide: { type: Boolean, default: false },
     likeCount: {
       type: Number,
       default: 0,
