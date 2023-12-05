@@ -43,6 +43,7 @@
           <input
             type="radio"
             class="form-check-input"
+            placeholder="<%= product.description %>"
             name="category"
             value="tra sua"
             checked
@@ -110,13 +111,12 @@
         <input type="file" class="form-control" required name="image" />
       </div>
       <div class="mb-3">
-        <label class="form-label">Còn trong giỏ hàng</label>
+        <label class="form-label">Mô tả sản phẩm</label>
         <input
-          required
-          type="number"
-          class="form-control"
-          placeholder="<%= product.quantityInStock %>"
-          name="quantityInStock"
+        class="form-control"
+        required
+        placeholder="<%= product.description %>"
+        name="description"
         />
       </div>
       <button type="submit" class="btn btn-primary">Sửa Sản Phẩm</button>

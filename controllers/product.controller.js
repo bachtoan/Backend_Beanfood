@@ -129,8 +129,7 @@ exports.editDataProduct = async (req, res, next) => {
       ...req.body,
       realPrice: Number.parseInt(req.body.realPrice),
       discountPrice: Number.parseInt(req.body.discountPrice),
-      quantityInStock: Number.parseInt(req.body.quantityInStock),
-      description: "Mon an ngon",
+      description: String(req.body.description),
       restaurantId: id,
       image: `https://firebasestorage.googleapis.com/v0/b/datn-de212.appspot.com/o/${nameFile}?alt=media&token=d890e1e7-459c-4ea8-a233-001825f3c1ae`,
     };
@@ -157,8 +156,7 @@ exports.addProduct = async (req, res, next) => {
       ...req.body,
       realPrice: Number.parseInt(req.body.realPrice),
       discountPrice: Number.parseInt(req.body.discountPrice),
-      quantityInStock: Number.parseInt(req.body.quantityInStock),
-      description: "Mon an ngon",
+      description: String(req.body.description),
       restaurantId: id,
       image: `https://firebasestorage.googleapis.com/v0/b/datn-de212.appspot.com/o/${nameFile}?alt=media&token=d890e1e7-459c-4ea8-a233-001825f3c1ae`,
     };
