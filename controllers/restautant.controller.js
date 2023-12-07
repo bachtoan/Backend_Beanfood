@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 var restaurantModel = require("../models/restaurant.model");
 const bcrypt = require("bcrypt");
 const { render } = require("ejs");
+const firebase = require("../firebase/index.js");
 
 exports.getRestaurants = async (req, res, next) => {
   try {
@@ -16,6 +17,30 @@ exports.getRestaurants = async (req, res, next) => {
   } catch (error) {
     return res.status(500).json({ msg: error.message });
   }
+};
+
+exports.editProfile = async (req, res, next) => {
+  const id = req.session.user?._id;
+  const nameFile = req.file.originalname;
+  const blob = firebase.bucket.file(nameFile);
+  const blobWriter = blob.createWriteStream({
+    metadata: {
+      contentType: req.file.mimetype,
+    },
+  });
+
+  blobWriter.on("finish", () => {
+    const profileRestaurant = {
+      ...req.body,
+      image: `https://firebasestorage.googleapis.com/v0/b/datn-de212.appspot.com/o/${nameFile}?alt=media&token=d890e1e7-459c-4ea8-a233-001825f3c1ae`,
+    };
+    restaurantModel.restaurantModel
+      .findByIdAndUpdate({ _id: id }, profileRestaurant)
+      .then(() => {
+        res.redirect("/");
+      });
+  });
+  blobWriter.end(req.file.buffer);
 };
 exports.getInfoRestaurantById = async (req, res, next) => {
   const restaurantId = req.params.id;

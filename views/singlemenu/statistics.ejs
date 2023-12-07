@@ -2,6 +2,12 @@
 <div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1">
   <div>
     <h2>Danh sách Đơn hàng</h2>
+    <h1>số lượng đơn đã hủy<span id="slh"></span></h1>
+    <h1>số lượng đơn đã thành công<span id="sltc"></span></h1>
+
+    <button id="donthanhcong">Đơn thành công</button>
+    <button id="donhuy">Đơn đã hủy</button>
+
     <table class="table">
       <thead>
         <tr>
@@ -19,15 +25,96 @@
 </div>
 
 <script>
+  let defaultLoad = "thanhcong";
+  var btnDonHuy = document.getElementById("donhuy");
+  var btnDonTc = document.getElementById("donthanhcong");
+  var slh = document.getElementById("slh");
+  var sltc = document.getElementById("sltc");
+
+  const tableBody = document.getElementById("orderTableBody");
+  var orders = [];
+  let totalAmount = 0;
+  btnDonTc.onclick = async function () {
+    defaultLoad = "thanhcong";
+    orders = [];
+    try {
+      const response = await fetch(`/api/orderStatistics/${defaultLoad}`);
+      orders = await response.json();
+      while (tableBody.rows.length > 0) {
+        tableBody.deleteRow(0);
+      }
+      orders.orders.forEach((order, index) => {
+        const totalPrice = order.products.reduce(
+          (sum, product) => sum + product.price,
+          0
+        );
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td>
+            <ul>
+              <li>${++index}</li>
+            </ul>
+          </td>
+          <td>
+            <ul>
+               <a href="/donhang/${order._id}"><li>${order._id}</li></a>
+
+            </ul>
+            </td>
+
+          <td>${order.status === 3 ? "Hoàn thành" : "Chưa hoàn thành"}</td>
+          <td>${new Date(order.time).toLocaleString()}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    } catch (error) {
+      console.error("Error fetching or processing data:", error);
+    }
+  };
+  btnDonHuy.onclick = async function () {
+    defaultLoad = "huy";
+    try {
+      const response = await fetch(`/api/orderStatistics/${defaultLoad}`);
+      orders = await response.json();
+      while (tableBody.rows.length > 0) {
+        tableBody.deleteRow(0);
+      }
+      orders.orders.forEach((order, index) => {
+        const totalPrice = order.products.reduce(
+          (sum, product) => sum + product.price,
+          0
+        );
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td>
+            <ul>
+              <li>${++index}</li>
+            </ul>
+          </td>
+          <td>
+            <ul>
+               <a href="/donhang/${order._id}"><li>${order._id}</li></a>
+
+            </ul>
+            </td>
+
+          <td>${order.status === 3 ? "Hoàn thành" : "đã huy"}</td>
+          <td>${new Date(order.time).toLocaleString()}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    } catch (error) {
+      console.error("Error fetching or processing data:", error);
+    }
+  };
   document.addEventListener("DOMContentLoaded", async function () {
     try {
-      // Fetch danh sách hóa đơn từ máy chủ khi trang được tải
-      const response = await fetch("/api/orderStatistics");
-      const orders = await response.json();
-      const tableBody = document.getElementById("orderTableBody");
-      let totalAmount = 0;
+      const response = await fetch(`/api/orderStatistics/${defaultLoad}`);
+      orders = await response.json();
+      slh.textContent = orders.soluongdahuy;
+      sltc.textContent = orders.soluongthanhcong;
 
-      orders.forEach((order, index) => {
+      orders.orders.forEach((order, index) => {
         const totalPrice = order.products.reduce(
           (sum, product) => sum + product.price,
           0
@@ -56,3 +143,4 @@
     }
   });
 </script>
+<%- include('../inc/footer.ejs') %>

@@ -2,6 +2,8 @@ var express = require("express");
 const session = require("express-session");
 const { yeu_cau_dang_nhap } = require("../middleware/checklogin");
 var product = require("../controllers/product.controller");
+var comment = require("../controllers/comment.controller");
+const mongoose = require("mongoose");
 var sanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 var order = require("../controllers/orderControllers");
 const history = require("../controllers/historyOrderController");
@@ -46,6 +48,34 @@ router.get("/home", function (req, res, next) {
   res.render("home", { title: "Express" });
 });
 
+router.get("/feedback", async function (req, res) {
+  const data = await product.dataProductRestaurant(req, res);
+
+  const getAllComment = await comment.getAllComment(req, res);
+  const info = [];
+  data.map((dt, index) => {
+    const dataFilter = {};
+    const objectId1 = new mongoose.Types.ObjectId(dt?._id);
+    dataFilter.name = dt.name;
+    dataFilter.image = dt.image;
+    dataFilter.listComment = [];
+    getAllComment.map((cm, index) => {
+      const objectId2 = new mongoose.Types.ObjectId(cm?.idProduct?._id);
+      if (objectId1.equals(objectId2)) {
+        dataFilter.listComment.push({
+          username: cm.idUser?.username,
+          avatar: cm.idUser?.avatar,
+          title: cm.title,
+        });
+      }
+    });
+    info.push(dataFilter);
+  });
+  console.log("bang comment", info);
+
+  res.render("feedback/feedback", { req: req, data: info });
+});
+
 router.get("/revenue", function (req, res, next) {
   res.render("revenue/showrevenue", { title: "Express", req: req });
 });
@@ -56,7 +86,7 @@ router.get("/duyetDon", function (req, res, next) {
   res.render("singlemenu/duyetDon", { title: "Express", req: req });
 });
 router.get("/MyProfile", function (req, res, next) {
-  res.render("myprofile", { title: "Express", req: req });
+  res.render("profile/profile", { title: "Express", req: req });
 });
 router.get("/Favorite", function (req, res, next) {
   res.render("favorite/favorites", { title: "Express", req: req });
