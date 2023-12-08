@@ -141,7 +141,6 @@ exports.weblogin = async (req, res, next) => {
 };
 
 exports.weblogout = async (req, res, next) => {
-  console.log("aaaa");
   req.session.destroy((err) => {
     if (err) {
       console.log(err);
@@ -186,20 +185,50 @@ exports.getListRestaurant = async (req, res, next) => {
 };
 
 exports.searchRestaurant = async (req, res, next) => {
-  console.log(req.query.name);
   try {
+    const ITEMS_PER_PAGE = 10;
+    const page = +req.query.page || 1;
     let regex = new RegExp(req.query.name, "i");
+
+    const searchQuery = { name: regex };
+
+    const restaurants = await restaurantModel.restaurantModel
+      .find(searchQuery)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+
+    const currentDate = new Date();
+    restaurants.forEach((restaurant) => {
+      const createdAtDate = new Date(restaurant.createdAt);
+      const timeDifference = currentDate - createdAtDate;
+      const daysDifference = timeDifference / (1000 * 3600 * 24);
+      restaurant.daysSinceCreation = Math.round(daysDifference);
+    });
+
+    const totalRestaurants =
+      await restaurantModel.restaurantModel.countDocuments(searchQuery);
+
+    const totalPages = Math.ceil(totalRestaurants / ITEMS_PER_PAGE);
+
     let msg = "";
-    let list = await restaurantModel.restaurantModel.find({ name: regex });
-    if (list.length == 0) {
+    if (restaurants.length === 0) {
       msg = "Không có nhà hàng: " + req.query.name;
     }
-    res.render("restaurant/res", { list: list, msg: msg, req: req });
+
+    res.render("restaurant/res", {
+      list: restaurants,
+      msg: msg,
+      req: req,
+      currentPage: page,
+      totalPages: totalPages,
+    });
   } catch (error) {
     console.log(error);
     res.redirect("/"); // Nếu có lỗi, chuyển hướng về trang chủ
   }
 };
+
 exports.getProfile = async (req, res, next) => {
   try {
     const restaurantId = req.params.id;
