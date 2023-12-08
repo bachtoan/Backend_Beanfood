@@ -1,5 +1,6 @@
 var express = require("express");
 const router = express.Router();
+const moment = require("moment");
 const multer = require("multer");
 var apiU = require("../controllers/user.controllers");
 var apiOder = require("../controllers/orderControllers");
@@ -9,7 +10,7 @@ var apiComment = require("../controllers/comment.controller");
 var apiRestaurant = require("../controllers/restautant.controller");
 var apiProduct = require("../controllers/product.controller");
 var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
-
+var hisToryModel = require("../models/history");
 var apifavorite = require("../controllers/favoriteController");
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -48,10 +49,57 @@ router.put(
   apiHistory.updateOrderStatusByRestaurant
 );
 router.put("/user/cancel", apiHistory.cancelOrder);
-router.get("/revenue", apiHistory.getTotalRevenue);
+//doanh thu
+router.get("/thongke/:slug", async (req, res) => {
+  const slugData = req.params.slug;
+  const user = req.session.user;
+  const restaurantId = user._id;
+  let dayData;
+  switch (slugData) {
+    case "today":
+      dayData = 0;
+      break;
+    case "weekago":
+      dayData = 7;
+      break;
+    case "monthago":
+      dayData = 30;
+      break;
+    case "threeago":
+      dayData = 90;
+      break;
+    case "sixago":
+      dayData = 180;
+      break;
+    case "yearago":
+      dayData = 365;
+      break;
+    default:
+      dayData = 0;
+  }
+  const currentDate = moment();
+  const timeAgo = moment(currentDate).subtract(dayData, "days");
+  const query = { "products.restaurantId": restaurantId, status: 3 };
+  if (dayData === 0) {
+    query.time = { $gte: currentDate.toDate() };
+  } else {
+    query.time = { $gte: timeAgo.toDate(), $lt: currentDate.toDate() };
+  }
+
+  const result = await hisToryModel.History.find(query);
+  let total = 0;
+  result.forEach((rs) => {
+    total += rs?.toltalprice;
+  });
+
+  return res.json({
+    total: total,
+  });
+});
+
 //ép về date
 router.get("/ordersByRestaurant", apiHistory.getOrdersByRestaurant);
-router.get("/orderStatistics", apiHistory.getOrders);
+router.get("/orderStatistics/:slug", apiHistory.getOrders);
 
 // top nhà hàng
 router.get("/topRestaurants", apiHistory.getTopRestaurants);
@@ -84,6 +132,11 @@ router.post(
   apiProduct.editDataProduct
 );
 
+router.post(
+  "/restaurant/editProfile",
+  upload.single("image"),
+  apiRestaurant.editProfile
+);
 router.post(
   "/product/addProduct",
   upload.single("image"),

@@ -56,6 +56,7 @@ exports.dataProductRestaurant = async (req, res, next) => {
   try {
     let list = await productModel.productModel.find({
       restaurantId: id,
+      isHide: false,
     });
     if (list) {
       return list;
