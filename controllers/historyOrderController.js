@@ -2,7 +2,7 @@ var historyModel = require("../models/history");
 const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
-const moment = require('moment');
+const moment = require("moment");
 
 exports.createOrderSuccess = async (req, res, next) => {
   console.log("data", req.body);
@@ -26,6 +26,7 @@ exports.getDonHangChiTiet = async (id) => {
     _id: data?._id,
     username,
     phone,
+    totalPrice: data.toltalprice,
   };
   return dataConcat;
 };
@@ -177,47 +178,7 @@ exports.cancelOrder = async (req, res) => {
   }
 };
 
-exports.getTotalRevenue = async (req, res) => {
-  try {
-    const user = req.session.user;
-    if (!user) {
-      return res.status(401).json({ msg: 'Nhà hàng chưa đăng nhập' });
-    }
-    const restaurantId = user._id;
-
-    const orders = await historyModel.History.find({
-      'products.restaurantId': restaurantId,
-      status: 3,
-    });
-
-    if (orders.length === 0) {
-      return res.status(404).json({ msg: 'Không có đơn hàng' });
-    }
-
-    let totalRevenue = 0;
-
-    for (const order of orders) {
-      for (const product of order.products) {
-        const productInfo = await ProductModel.productModel.findById(
-          product.productId
-        );
-
-        if (productInfo) {
-          const revenueFromProduct = product.quantity * productInfo.realPrice;
-          totalRevenue += revenueFromProduct;
-        }
-      }
-    }
-
-    res.status(200).json({ totalRevenue });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: 'Đã xảy ra lỗi' });
-  }
-};
-
-
-exports.getOrders = async (req, res) => {
+exports.getDoanhThuTheoDieuKien = async (req) => {
   try {
     const user = req.session.user;
     const restaurantId = user._id;
@@ -225,7 +186,44 @@ exports.getOrders = async (req, res) => {
       "products.restaurantId": restaurantId,
       status: 3,
     });
-    res.json(orders);
+    return orders;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.getOrders = async (req, res) => {
+  var slug = req.params.slug;
+  let value = 3;
+  if (slug == "huy") {
+    console.log("vao day");
+    value = 4;
+  } else {
+    value = 3;
+  }
+  try {
+    const user = req.session.user;
+    const restaurantId = user._id;
+
+    const soluongdahuy = await historyModel.History.countDocuments({
+      status: 4,
+      "products.restaurantId": restaurantId,
+    });
+    const soluongthanhcong = await historyModel.History.countDocuments({
+      status: 3,
+      "products.restaurantId": restaurantId,
+    });
+
+    const orders = await historyModel.History.find({
+      "products.restaurantId": restaurantId,
+      status: value,
+    });
+    console.log(orders);
+    res.json({
+      orders,
+      soluongdahuy,
+      soluongthanhcong,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Đã xảy ra lỗi" });
@@ -279,7 +277,6 @@ exports.getTopRestaurants = async (req, res) => {
           image: { $ifNull: ["$restaurantInfo.image", ""] },
           address: { $ifNull: ["$restaurantInfo.address", ""] },
           totalRevenue: 1,
-         
         },
       },
       {

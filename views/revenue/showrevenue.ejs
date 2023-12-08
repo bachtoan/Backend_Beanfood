@@ -3,49 +3,49 @@
 <%- include('../inc/header-user.ejs') %>
 
 <main>
-  <div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1;">
-    <!-- Biểu đồ cột -->
-    <div class="chart-container" style="position: relative; height:80vh; width:80vw;">
-      <canvas id="revenueBarChart"></canvas>
-    </div>
+  <div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1">
+    <form method="/" id="form-submit">
+      <select onSl id="form-select">
+        <option value="today" selected>Hôm nay</option>
+        <option value="weekago">Tuần vừa rồi</option>
+        <option value="monthago">Tháng vừa rồi</option>
+        <option value="threeago">3 Tháng vua roi</option>
+        <option value="sixago">6 Tháng trước</option>
+        <option value="yearago">1 Năm trước</option>
+      </select>
+    </form>
+    <h1 style="margin-top: 20px">Tổng doanh thu</h1>
+    <h3 id="tongtien">VND</h3>
   </div>
 </main>
 
 <%- include('../inc/footer.ejs') %>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', async function () {
-    // Fetch dữ liệu cho biểu đồ cột
-    const barResponse = await fetch('/api/revenue');
-    const barData = await barResponse.json();
-
-    const barLabels = ['Doanh Thu']; // Tên của biểu đồ cột
-    const barRevenueData = [barData.totalRevenue];
-
-    // Lấy thẻ canvas cho biểu đồ cột
-    const barCtx = document.getElementById('revenueBarChart').getContext('2d');
-
-    // Tạo biểu đồ cột
-    new Chart(barCtx, {
-      type: 'bar',
-      data: {
-        labels: barLabels,
-        datasets: [{
-          data: barRevenueData,
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 1,
-        }],
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-      },
+<script defer>
+  const form = document.getElementById("form-submit");
+  const select = document.getElementById("form-select");
+  const ttien = document.getElementById("tongtien");
+  let data = "today";
+  fetch(`/api/thongke/${data}`)
+    .then((e) => {
+      return e.json();
+    })
+    .then((tt) => {
+      ttien.textContent = `${tt.total}VND`;
+    })
+    .catch((e) => {
+      console.log(e);
     });
+  select.addEventListener("change", (e) => {
+    data = e.target.value;
+    fetch(`/api/thongke/${data}`)
+      .then((e) => {
+        return e.json();
+      })
+      .then((tt) => {
+        ttien.textContent = `${tt.total}VND`;
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   });
 </script>

@@ -14,7 +14,6 @@ const restaurantSchema = new mongoose.Schema(
     address: String,
     timeon: String,
     timeoff: String,
-    idDiscount: String,
     email: String,
     phone: String,
   },

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style></style>
+  </head>
+  <body>
+    <%- include('../inc/header-user.ejs') %>
+    <div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">STT</th>
+            <th scope="col">Tên Sản Phẩm</th>
+            <th scope="col">Ảnh</th>
+            <th scope="col">Bình luận</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (let i = 0; i < data.length; i++) { %>
+          <tr>
+            <th scope="row"><%= i + 1 %></th>
+            <td><%= data[i].name %></td>
+            <td>
+              <img
+                src="<%= data[i].image %>"
+                alt="<%= data[i].name %>"
+                style="max-width: 100px"
+              />
+            </td>
+            <% for (let j = 0; j < data[i].listComment.length; j++) { %>
+            <div>
+              <td><%= data[i].listComment[j].username %></td>
+            </div>
+            <td><%= data[i].listComment[j].title %></td>
+
+            <% } %>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <%- include('../inc/footer.ejs') %>
+  </body>
+</html>

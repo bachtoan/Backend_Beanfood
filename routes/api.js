@@ -1,5 +1,6 @@
 var express = require("express");
 const router = express.Router();
+const moment = require("moment");
 const multer = require("multer");
 var apiU = require("../controllers/user.controllers");
 var apiOder = require("../controllers/orderControllers");
@@ -9,7 +10,7 @@ var apiComment = require("../controllers/comment.controller");
 var apiRestaurant = require("../controllers/restautant.controller");
 var apiProduct = require("../controllers/product.controller");
 var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
-
+var hisToryModel = require("../models/history");
 var apifavorite = require("../controllers/favoriteController");
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -32,10 +33,12 @@ router.get("/order/:userId", apiOder.getOrdersByUser);
 // yêu thích
 router.post("/favorite", apifavorite.toggleLike);
 router.get("/favorite/getAll", apifavorite.getAllFavorite);
-router.get("/favorite/getbyUid/:userId", apifavorite.getListProductFavoritebyUid);
+router.get(
+  "/favorite/getbyUid/:userId",
+  apifavorite.getListProductFavoritebyUid
+);
 router.get("/getLike", apifavorite.getLikes);
-router.get('/getTop', apifavorite.getTop);
-// lịch sủ mua hàng
+router.get("/getTop", apifavorite.getTop);
 router.post("/history/create", apiHistory.createOrderSuccess);
 router.get("/history", apiHistory.getHistory);
 router.get("/ordersByUser/:userId", apiHistory.getUserHistory);
@@ -46,10 +49,57 @@ router.put(
   apiHistory.updateOrderStatusByRestaurant
 );
 router.put("/user/cancel", apiHistory.cancelOrder);
-router.get("/revenue", apiHistory.getTotalRevenue);
+//doanh thu
+router.get("/thongke/:slug", async (req, res) => {
+  const slugData = req.params.slug;
+  const user = req.session.user;
+  const restaurantId = user._id;
+  let dayData;
+  switch (slugData) {
+    case "today":
+      dayData = 0;
+      break;
+    case "weekago":
+      dayData = 7;
+      break;
+    case "monthago":
+      dayData = 30;
+      break;
+    case "threeago":
+      dayData = 90;
+      break;
+    case "sixago":
+      dayData = 180;
+      break;
+    case "yearago":
+      dayData = 365;
+      break;
+    default:
+      dayData = 0;
+  }
+  const currentDate = moment();
+  const timeAgo = moment(currentDate).subtract(dayData, "days");
+  const query = { "products.restaurantId": restaurantId, status: 3 };
+  if (dayData === 0) {
+    query.time = { $gte: currentDate.toDate() };
+  } else {
+    query.time = { $gte: timeAgo.toDate(), $lt: currentDate.toDate() };
+  }
+
+  const result = await hisToryModel.History.find(query);
+  let total = 0;
+  result.forEach((rs) => {
+    total += rs?.toltalprice;
+  });
+
+  return res.json({
+    total: total,
+  });
+});
+
 //ép về date
 router.get("/ordersByRestaurant", apiHistory.getOrdersByRestaurant);
-router.get("/orderStatistics", apiHistory.getOrders);
+router.get("/orderStatistics/:slug", apiHistory.getOrders);
 
 // top nhà hàng
 router.get("/topRestaurants", apiHistory.getTopRestaurants);
@@ -66,7 +116,7 @@ router.get("/restaurant/:id", apiRestaurant.getInfoRestaurantById);
 
 router.post("/restaurant/delete/:id", apiRestaurant.deleteRestaurant);
 //products
-router.post("/product/delete/:id", apiProduct.deleteProduct);
+router.post("/product/delete/:id", apiProduct.ngungKinhDoanhProduct);
 router.get("/product/id/:id", apiProduct.getProduct);
 router.get("/product/suggest", apiProduct.getSuggest);
 router.post("/product/getbyname", apiProduct.getProductByName);
@@ -82,6 +132,11 @@ router.post(
   apiProduct.editDataProduct
 );
 
+router.post(
+  "/restaurant/editProfile",
+  upload.single("image"),
+  apiRestaurant.editProfile
+);
 router.post(
   "/product/addProduct",
   upload.single("image"),
