@@ -39,7 +39,7 @@ router.get(
 );
 router.get("/getLike", apifavorite.getLikes);
 router.get("/getTop", apifavorite.getTop);
-router.get("/don-hang/:id", apiHistory.getDonHangChiTiet);
+router.get("/don-hang/:id", apiHistory.getChiTiet);
 router.post("/history/create", apiHistory.createOrderSuccess);
 router.get("/history", apiHistory.getHistory);
 router.get("/ordersByUser/:userId", apiHistory.getUserHistory);
