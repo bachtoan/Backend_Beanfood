@@ -5,13 +5,12 @@
     <table class="table">
       <thead>
         <tr>
+          <th scope="col">Mã Đơn Hàng</th>
           <th scope="col">Địa Chỉ Đơn Hàng</th>
           <th scope="col">Sản Phẩm</th>
-          <th scope="col">Tổng Giá</th>
           <th scope="col">Phương Thức Thanh Toán</th>
           <th scope="col">Trạng Thái</th>
           <th scope="col">Ghi Chú</th>
-          <th scope="col">Thời Gian</th>
           <th scope="col">Cập Nhật Trạng Thái</th>
         </tr>
       </thead>
@@ -34,13 +33,12 @@
         .forEach(order => {
           const row = document.createElement('tr');
           row.innerHTML = `
+          <td>${order._id}</td>
             <td>${order.address}</td>
             <td>${order.products.map(product => `${product.name} x${product.quantity}`).join('<br>')}</td>
-            <td>${order.toltalprice}</td>
             <td>${order.phuongthucthanhtoan === 'cash' ? 'Thanh toán tiền mặt' : 'Chuyển khoản'}</td>
             <td>${getOrderStatusText(order.status)}</td>
             <td>${order.notes}</td>
-            <td>${new Date(order.time).toLocaleString()}</td>
             <td>
               <form onsubmit="updateOrderStatus(event, '${order._id}', '${order.status}')">
                 <div class="update-status-container">
