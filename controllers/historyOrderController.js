@@ -26,6 +26,7 @@ exports.getDonHangChiTiet = async (id) => {
     _id: data?._id,
     username,
     phone,
+    address: data.address,
     totalPrice: data.toltalprice,
   };
   return dataConcat;
@@ -316,5 +317,73 @@ exports.getTopRestaurants = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Đã xảy ra lỗi" });
+  }
+};
+
+
+exports.getRevenueRestaurant = async (req, res, next) => {
+  const currentDate = moment().startOf("day");
+  const startOfToday =  moment().startOf("day").toISOString();
+  const startOfThisMonth = moment().startOf("month").toISOString();
+  const startOfThisYear = moment().startOf("year").toISOString();
+  try {
+    const user = req.session.user;
+    const restaurantId = user._id;
+    const billsToday = await historyModel.History.find({
+      time: { $gte: startOfToday },
+      status: 3,
+      "products.restaurantId": restaurantId,
+    });
+    console.log('start today', startOfToday);
+    const billsThisMonth = await historyModel.History.find({
+      time: { $gte: startOfThisMonth },
+      status: 3,
+      "products.restaurantId": restaurantId,
+    });
+    const billsThisYear = await historyModel.History.find({
+      time: { $gte: startOfThisYear },
+      status: 3,
+      "products.restaurantId": restaurantId,
+    });
+    const userIdsToday = Array.from(
+      new Set(billsToday.map((bill) => bill.userId))
+    );
+    const userIdsThisMonth = Array.from(
+      new Set(billsThisMonth.map((bill) => bill.userId))
+    );
+    const userIdsThisYear = Array.from(
+      new Set(billsThisYear.map((bill) => bill.userId))
+    );
+    const totalRevenueToday = billsToday.reduce(
+      (total, bill) =>
+        isNaN(bill.toltalprice) ? total : total + bill.toltalprice,
+      0
+    );
+    const totalRevenueThisMonth = billsThisMonth.reduce(
+      (total, bill) =>
+        isNaN(bill.toltalprice) ? total : total + bill.toltalprice,
+      0
+    );
+    const totalRevenueThisYear = billsThisYear.reduce(
+      (total, bill) =>
+        isNaN(bill.toltalprice) ? total : total + bill.toltalprice,
+      0
+    );
+    console.log("data", billsToday);
+    res.render("revenue/showrevenue", {
+      req: req,
+      bills: billsToday,
+      billsThisMonth: billsThisMonth,
+      billsThisYear: billsThisYear,
+      userIdsToday: userIdsToday,
+      userIdsThisMonth: userIdsThisMonth,
+      userIdsThisYear: userIdsThisYear,
+      totalRevenueToday: totalRevenueToday,
+      totalRevenueThisMonth: totalRevenueThisMonth,
+      totalRevenueThisYear: totalRevenueThisYear,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu từ bảng Bill:", error);
+    res.status(500).send("Đã xảy ra lỗi khi lấy dữ liệu từ bảng Bill");
   }
 };
