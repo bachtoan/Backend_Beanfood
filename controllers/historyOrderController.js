@@ -2,12 +2,30 @@ var historyModel = require("../models/history");
 const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
+var voucherModel = require("../models/voucher.model");
+
 const moment = require("moment");
 
 exports.createOrderSuccess = async (req, res, next) => {
   console.log("data", req.body);
   try {
     const OrderSuccess = new historyModel.History(req.body);
+    //   const checkTg = req.body.time;
+    //   const voucherId = req.body?.voucherId;
+
+    // await  voucherModel.voucherModel.findById({ _id: voucherId }).then((data) => {
+    //   //    const date1 = new Date("2023-01-01T12:00:00Z");
+    //   // const date2 = new Date("2023-01-02T12:00:00Z");
+    //   if (date1 < date2) {
+    //     console.log("date1 is before date2");
+    //   } else if (date1 > date2) {
+    //     console.log("date1 is after date2");
+    //   } else {
+    //     console.log("date1 is equal to date2");
+    //   }
+
+    //   });
+
     let new_OrderSuccess = await OrderSuccess.save();
     return res.status(200).json({ OrderSuccess: new_OrderSuccess });
   } catch (error) {
@@ -36,24 +54,25 @@ exports.getChiTiet = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({ error: 'ID không hợp lệ' });
+      return res.status(400).json({ error: "ID không hợp lệ" });
     }
 
-    const chiTietDonHang = await historyModel.History.findOne({ _id: id })
-      .populate({
-        path: 'products.restaurantId',
-        select: 'name',
-        model: 'restaurantModel', 
-      });
+    const chiTietDonHang = await historyModel.History.findOne({
+      _id: id,
+    }).populate({
+      path: "products.restaurantId",
+      select: "name",
+      model: "restaurantModel",
+    });
 
     if (!chiTietDonHang) {
-      return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
+      return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
     }
 
     res.json(chiTietDonHang);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+    res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
   }
 };
 exports.getHistory = async (req, res) => {
@@ -271,7 +290,7 @@ exports.getTopRestaurants = async (req, res) => {
       },
       {
         $lookup: {
-          from: "restaurants", 
+          from: "restaurants",
           localField: "_id",
           foreignField: "_id",
           as: "restaurantInfo",
@@ -320,10 +339,9 @@ exports.getTopRestaurants = async (req, res) => {
   }
 };
 
-
 exports.getRevenueRestaurant = async (req, res, next) => {
   const currentDate = moment().startOf("day");
-  const startOfToday =  moment().startOf("day").toISOString();
+  const startOfToday = moment().startOf("day").toISOString();
   const startOfThisMonth = moment().startOf("month").toISOString();
   const startOfThisYear = moment().startOf("year").toISOString();
   try {
@@ -334,7 +352,7 @@ exports.getRevenueRestaurant = async (req, res, next) => {
       status: 3,
       "products.restaurantId": restaurantId,
     });
-    console.log('start today', startOfToday);
+    console.log("start today", startOfToday);
     const billsThisMonth = await historyModel.History.find({
       time: { $gte: startOfThisMonth },
       status: 3,

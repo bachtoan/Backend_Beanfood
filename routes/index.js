@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 var sanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 var order = require("../controllers/orderControllers");
 const history = require("../controllers/historyOrderController");
+var apiVoucher = require("../controllers/voucher.controller");
+
 var router = express.Router();
 
 /* GET home page. */
@@ -29,6 +31,14 @@ router.get("/editProduct/:id", async function (req, res, next) {
     product: data,
   });
 });
+router.get("/editVoucher/:id", async function (req, res, next) {
+  const data = await apiVoucher.detailVoucher(req, res);
+  res.render("voucher/editvoucher", {
+    title: "Express",
+    req: req,
+    voucher: data,
+  });
+});
 router.get("/donhang/:id", async function (req, res, next) {
   const data = await history.getDonHangChiTiet(req.params.id);
   console.log(data);
@@ -37,15 +47,21 @@ router.get("/donhang/:id", async function (req, res, next) {
     data: data,
     req: req,
   });
-
-  // res.render("singlemenu/chitietdonhang", {
-  //   title: "Express",
-  //   data: data,
-  //   req: req,
-  // });
 });
 router.get("/home", function (req, res, next) {
   res.render("home", { title: "Express" });
+});
+router.get("/createvoucher", function (req, res, next) {
+  res.render("voucher/voucher", { title: "Express", req: req });
+});
+router.get("/listvoucher", async function (req, res, next) {
+  const listVoucher = await apiVoucher.getVoucher(req, res, next);
+
+  res.render("voucher/listvoucher", {
+    title: "Express",
+    list: listVoucher,
+    req: req,
+  });
 });
 
 router.get("/feedback", async function (req, res) {
