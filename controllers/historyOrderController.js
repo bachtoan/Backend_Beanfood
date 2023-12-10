@@ -15,7 +15,22 @@ exports.createOrderSuccess = async (req, res, next) => {
     return res.status(500).json({ msg: error.message });
   }
 };
-exports.getDonHangChiTiet = async (req, res) => {
+exports.getDonHangChiTiet = async (id) => {
+  const data = await historyModel.History.findOne({ _id: id });
+  const user = await userController.userModel.findOne({
+    _id: new mongoose.Types.ObjectId(data?.userId),
+  });
+  const { username, phone } = user;
+  const dataConcat = {
+    product: data.products,
+    _id: data?._id,
+    username,
+    phone,
+    totalPrice: data.toltalprice,
+  };
+  return dataConcat;
+};
+exports.getChiTiet = async (req, res) => {
   try {
     const { id } = req.params;
 
