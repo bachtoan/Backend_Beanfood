@@ -93,6 +93,7 @@ router.get("/Favorite", function (req, res, next) {
 });
 router.get("/listproduct", product.getListProduct);
 router.get("/adminRevenue", product.getRevenue);
+router.get("/showrevenue", history.getRevenueRestaurant);
 router.get("/orderstatistics", order.getOrdersWeb);
 router.get("/censorship", sanPhamDangDuyet.getListProduct);
 router.get("/censorship/duyet/:id", sanPhamDangDuyet.duyet);

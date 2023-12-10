@@ -58,9 +58,13 @@ exports.dataProductRestaurant = async (req, res, next) => {
   try {
     let list = await productModel.productModel.find({
       restaurantId: id,
-      isHide: false,
     });
     if (list) {
+        list.sort((a, b) => {
+        if (a.isHide && !b.isHide) return 1;
+        if (!a.isHide && b.isHide) return -1;
+        return 0;
+      });
       return list;
     } else {
       return res.status(400).json({ msg: "Lay du lieu san pham thanh cong" });
@@ -214,6 +218,7 @@ exports.getRevenue = async (req, res, next) => {
     // Lấy các hóa đơn trong tháng
     const billsThisMonth = await History.find({
       time: { $gte: startOfThisMonth },
+      
     });
 
     // Lấy các hóa đơn trong năm
