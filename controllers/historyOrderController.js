@@ -2,12 +2,30 @@ var historyModel = require("../models/history");
 const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
+var voucherModel = require("../models/voucher.model");
+
 const moment = require("moment");
 
 exports.createOrderSuccess = async (req, res, next) => {
   console.log("data", req.body);
   try {
     const OrderSuccess = new historyModel.History(req.body);
+    //   const checkTg = req.body.time;
+    //   const voucherId = req.body?.voucherId;
+
+    // await  voucherModel.voucherModel.findById({ _id: voucherId }).then((data) => {
+    //   //    const date1 = new Date("2023-01-01T12:00:00Z");
+    //   // const date2 = new Date("2023-01-02T12:00:00Z");
+    //   if (date1 < date2) {
+    //     console.log("date1 is before date2");
+    //   } else if (date1 > date2) {
+    //     console.log("date1 is after date2");
+    //   } else {
+    //     console.log("date1 is equal to date2");
+    //   }
+
+    //   });
+
     let new_OrderSuccess = await OrderSuccess.save();
     return res.status(200).json({ OrderSuccess: new_OrderSuccess });
   } catch (error) {
@@ -26,9 +44,36 @@ exports.getDonHangChiTiet = async (id) => {
     _id: data?._id,
     username,
     phone,
+    address: data.address,
     totalPrice: data.toltalprice,
   };
   return dataConcat;
+};
+exports.getChiTiet = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID không hợp lệ" });
+    }
+
+    const chiTietDonHang = await historyModel.History.findOne({
+      _id: id,
+    }).populate({
+      path: "products.restaurantId",
+      select: "name",
+      model: "restaurantModel",
+    });
+
+    if (!chiTietDonHang) {
+      return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
+    }
+
+    res.json(chiTietDonHang);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+  }
 };
 exports.getHistory = async (req, res) => {
   try {
@@ -46,7 +91,6 @@ exports.getUserHistory = async (req, res) => {
     if (!userId || userId.length !== 24) {
       return res.status(400).json({ msg: "ID người dùng không hợp lệ" });
     }
-    //
     const userHistory = await historyModel.History.find({ userId });
 
     if (!userHistory || userHistory.length === 0) {
@@ -75,7 +119,6 @@ exports.deleteHistory = async (req, res) => {
 };
 exports.deleteHistoryAll = async (req, res) => {
   try {
-    // Xóa tất cả các bản ghi trong mô hình History
     await historyModel.History.deleteMany({});
     res.json({ msg: "Tất cả lịch sử mua hàng đã được xóa" });
   } catch (error) {
@@ -83,7 +126,6 @@ exports.deleteHistoryAll = async (req, res) => {
   }
 };
 
-// cập nhật trạng thái đơn hàng
 exports.getOrdersByRestaurant = async (req, res) => {
   try {
     const user = req.session.user;
@@ -103,10 +145,6 @@ exports.updateOrderStatusByRestaurant = async (req, res) => {
   const newStatus = req.body.status;
 
   try {
-    // if (![0, 1, 2, 3].includes(newStatus)) {
-    //     return res.status(400).json({ msg: 'Trạng thái không hợp lệ.' });
-    // }
-
     const updatedOrder = await historyModel.History.findByIdAndUpdate(
       orderId,
       { $set: { status: newStatus } },
@@ -138,7 +176,6 @@ exports.updateOrderStatusByRestaurant = async (req, res) => {
   } catch (error) {
     console.error("Error:", error);
 
-    // Bắt lỗi cụ thể và trả về mã lỗi và thông điệp
     if (error.name === "CastError" && error.kind === "ObjectId") {
       return res.status(400).json({ msg: "ID đơn hàng không hợp lệ." });
     }
@@ -147,7 +184,6 @@ exports.updateOrderStatusByRestaurant = async (req, res) => {
   }
 };
 
-// hủy đơn hàng cho user khi còn ở trạng thái đang chờ duyệt
 exports.cancelOrder = async (req, res) => {
   try {
     const orderId = req.body.orderId;
@@ -230,7 +266,6 @@ exports.getOrders = async (req, res) => {
   }
 };
 
-// Hàm lấy danh sách top nhà hàng theo doanh thu
 exports.getTopRestaurants = async (req, res) => {
   try {
     const topRestaurants = await historyModel.History.aggregate([
@@ -247,16 +282,15 @@ exports.getTopRestaurants = async (req, res) => {
         $addFields: {
           "products.restaurantId": { $toObjectId: "$products.restaurantId" },
         },
-      }, // Convert restaurantId to ObjectId
+      },
       {
         $group: {
           _id: "$products.restaurantId",
-          // totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.price'] } },
         },
       },
       {
         $lookup: {
-          from: "restaurants", // Tên collection nhà hàng
+          from: "restaurants",
           localField: "_id",
           foreignField: "_id",
           as: "restaurantInfo",
@@ -283,11 +317,9 @@ exports.getTopRestaurants = async (req, res) => {
         $sort: { totalRevenue: -1 },
       },
       {
-        $limit: 10, // Chọn số lượng top nhà hàng bạn muốn hiển thị
+        $limit: 10,
       },
     ]);
-
-    // Log giá trị sau mỗi bước
     console.log("After Match:", topRestaurants);
     console.log("After Unwind:", topRestaurants);
     console.log("After Group:", topRestaurants);
@@ -304,5 +336,72 @@ exports.getTopRestaurants = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Đã xảy ra lỗi" });
+  }
+};
+
+exports.getRevenueRestaurant = async (req, res, next) => {
+  const currentDate = moment().startOf("day");
+  const startOfToday = moment().startOf("day").toISOString();
+  const startOfThisMonth = moment().startOf("month").toISOString();
+  const startOfThisYear = moment().startOf("year").toISOString();
+  try {
+    const user = req.session.user;
+    const restaurantId = user._id;
+    const billsToday = await historyModel.History.find({
+      time: { $gte: startOfToday },
+      status: 3,
+      "products.restaurantId": restaurantId,
+    });
+    console.log("start today", startOfToday);
+    const billsThisMonth = await historyModel.History.find({
+      time: { $gte: startOfThisMonth },
+      status: 3,
+      "products.restaurantId": restaurantId,
+    });
+    const billsThisYear = await historyModel.History.find({
+      time: { $gte: startOfThisYear },
+      status: 3,
+      "products.restaurantId": restaurantId,
+    });
+    const userIdsToday = Array.from(
+      new Set(billsToday.map((bill) => bill.userId))
+    );
+    const userIdsThisMonth = Array.from(
+      new Set(billsThisMonth.map((bill) => bill.userId))
+    );
+    const userIdsThisYear = Array.from(
+      new Set(billsThisYear.map((bill) => bill.userId))
+    );
+    const totalRevenueToday = billsToday.reduce(
+      (total, bill) =>
+        isNaN(bill.toltalprice) ? total : total + bill.toltalprice,
+      0
+    );
+    const totalRevenueThisMonth = billsThisMonth.reduce(
+      (total, bill) =>
+        isNaN(bill.toltalprice) ? total : total + bill.toltalprice,
+      0
+    );
+    const totalRevenueThisYear = billsThisYear.reduce(
+      (total, bill) =>
+        isNaN(bill.toltalprice) ? total : total + bill.toltalprice,
+      0
+    );
+    console.log("data", billsToday);
+    res.render("revenue/showrevenue", {
+      req: req,
+      bills: billsToday,
+      billsThisMonth: billsThisMonth,
+      billsThisYear: billsThisYear,
+      userIdsToday: userIdsToday,
+      userIdsThisMonth: userIdsThisMonth,
+      userIdsThisYear: userIdsThisYear,
+      totalRevenueToday: totalRevenueToday,
+      totalRevenueThisMonth: totalRevenueThisMonth,
+      totalRevenueThisYear: totalRevenueThisYear,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu từ bảng Bill:", error);
+    res.status(500).send("Đã xảy ra lỗi khi lấy dữ liệu từ bảng Bill");
   }
 };

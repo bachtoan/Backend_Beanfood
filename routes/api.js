@@ -4,6 +4,8 @@ const moment = require("moment");
 const multer = require("multer");
 var apiU = require("../controllers/user.controllers");
 var apiOder = require("../controllers/orderControllers");
+var apiVoucher = require("../controllers/voucher.controller");
+
 var apiHistory = require("../controllers/historyOrderController");
 var apiSlider = require("../controllers/slider.controller");
 var apiComment = require("../controllers/comment.controller");
@@ -29,7 +31,23 @@ router.delete("/deleteorder/:id", apiOder.deleteOrder);
 router.put("/updateorder/:id", apiOder.updateOrder);
 router.delete("/deletebyUid/:id", apiOder.deletebyUid);
 router.get("/order/:userId", apiOder.getOrdersByUser);
+//voucher
 
+router.get("/tinhtoanvoucherhethan", apiVoucher.tinhtoansovoucherhethang);
+
+router.post(
+  "/voucher/createVoucher",
+  upload.single("image"),
+  apiVoucher.addVoucher
+);
+router.get("/voucher/getVoucher", apiVoucher.getVoucher);
+router.post("/voucher/delete/:id", apiVoucher.deleteVoucher);
+router.post("/voucher/decrease", apiVoucher.handleDecreseVoucher);
+router.post(
+  "/voucher/editVoucher/:id",
+  upload.single("image"),
+  apiVoucher.editVoucher
+);
 // yêu thích
 router.post("/favorite", apifavorite.toggleLike);
 router.get("/favorite/getAll", apifavorite.getAllFavorite);
@@ -39,6 +57,7 @@ router.get(
 );
 router.get("/getLike", apifavorite.getLikes);
 router.get("/getTop", apifavorite.getTop);
+router.get("/don-hang/:id", apiHistory.getChiTiet);
 router.post("/history/create", apiHistory.createOrderSuccess);
 router.get("/history", apiHistory.getHistory);
 router.get("/ordersByUser/:userId", apiHistory.getUserHistory);
