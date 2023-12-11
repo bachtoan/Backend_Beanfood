@@ -276,13 +276,14 @@ exports.getRevenue = async (req, res, next) => {
       time: { $gte: startOfToday },
       status: 3,
     });
+    const dataForChartToday = organizeDataByHour(billsToday);
 
     // Lấy các hóa đơn trong tháng có status = 4
     const billsThisMonth = await History.find({
       time: { $gte: startOfThisMonth },
       status: 3,
     });
-    const dataForChartMonth = organizeDataByHour(billsThisMonth);
+    const dataForChartMonth = organizeDataByMonth(billsThisMonth);
 
     // Lấy các hóa đơn trong năm có status = 4
     const billsThisYear = await History.find({
@@ -319,7 +320,7 @@ exports.getRevenue = async (req, res, next) => {
         isNaN(bill.toltalprice) ? total : total + bill.toltalprice,
       0
     );
-
+      console.log(dataForChartMonth.categories, dataForChartMonth.data);
     res.render("revenue/adminRevenue", {
       req: req,
       bills: billsToday,
@@ -331,8 +332,10 @@ exports.getRevenue = async (req, res, next) => {
       totalRevenueToday: totalRevenueToday,
       totalRevenueThisMonth: totalRevenueThisMonth,
       totalRevenueThisYear: totalRevenueThisYear,
-      categories: dataForChartMonth.categories,
-      data: dataForChartMonth.data,
+      categoriesToday: dataForChartToday.categories,
+      dataToday: dataForChartToday.data,
+      categoriesMonth: dataForChartMonth.categories,
+      dataMonth: dataForChartMonth.data,
     });
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu từ bảng Bill:", error);
@@ -341,7 +344,6 @@ exports.getRevenue = async (req, res, next) => {
 };
 
 function organizeDataByHour(bills) {
-  // Chuyển đổi bills thành mảng chứa thời gian đã làm tròn và số lượng
   const roundedTimes = bills.map((bill) => {
     const time = new Date(bill.time);
     const roundedTime = new Date(
@@ -353,13 +355,10 @@ function organizeDataByHour(bills) {
     return { time: roundedTime, count: 1 };
   });
 
-  // Sắp xếp mảng theo thứ tự tăng dần
   roundedTimes.sort((a, b) => a.time - b.time);
 
-  // Tạo mảng data
   const data = [];
 
-  // Điền data từ mảng đã sắp xếp
   roundedTimes.forEach((roundedTime) => {
     const hourKey = roundedTime.time.toISOString();
     const existingData = data.find((item) => item.time === hourKey);
@@ -371,11 +370,17 @@ function organizeDataByHour(bills) {
     }
   });
 
-  // Sắp xếp mảng data theo thời gian
   data.sort((a, b) => new Date(a.time) - new Date(b.time));
-
-  // Lấy giá trị count để tạo mảng giá trị cho biểu đồ
   const valuesForChart = data.map((item) => item.count);
 
   return { categories: data.map((item) => item.time), data: valuesForChart };
 }
+function organizeDataByMonth(bills) {
+  const uniqueDays = [...new Set(bills.map(bill => new Date(bill.time).toISOString().split('T')[0]))];
+  const categories = uniqueDays.sort();
+
+  const data = categories.map(day => bills.filter(bill => new Date(bill.time).toISOString().split('T')[0] === day).length);
+  console.log(categories, data);
+  return { categories, data };
+}
+
