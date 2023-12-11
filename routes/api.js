@@ -125,7 +125,7 @@ router.get("/topRestaurants", apiHistory.getTopRestaurants);
 //slider
 router.get("/slider/getAll", apiSlider.getSliders);
 //comment
-router.get("/comment/getAll", apiComment.getComment);
+router.get("/comment/getAll/:idProduct", apiComment.getComment);
 router.post("/comment/create", apiComment.postComment);
 
 //restaurant

@@ -1,7 +1,6 @@
-require("../models/product.model");
 var commentModel = require("../models/comment.model");
 exports.getComment = async (req, res, next) => {
-  const idProduct = req.body.idProduct;
+  const idProduct = req.params.idProduct;
   try {
     let list = await commentModel.commentModel
       .find({
@@ -10,6 +9,7 @@ exports.getComment = async (req, res, next) => {
       .populate({ path: "idUser", select: "username avatar" })
       .populate({ path: "idProduct", select: "name images _id" })
       .exec();
+      console.log('id', idProduct);
     if (list) {
       return res
         .status(200)
