@@ -176,7 +176,7 @@ exports.weblogout = async (req, res, next) => {
 };
 
 exports.getListRestaurant = async (req, res, next) => {
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 5;
   try {
     const page = +req.query.page || 1;
     const restaurants = await restaurantModel.restaurantModel
@@ -253,6 +253,8 @@ exports.searchRestaurant = async (req, res, next) => {
     res.redirect("/"); // Nếu có lỗi, chuyển hướng về trang chủ
   }
 };
+
+exports.searchProductOnListProduct = async (req, res, next) => {};
 
 exports.getProfile = async (req, res, next) => {
   try {

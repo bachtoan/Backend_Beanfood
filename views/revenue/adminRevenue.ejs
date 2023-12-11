@@ -34,7 +34,7 @@
                     <a
                       class="dropdown-item"
                       href="#"
-                      onclick="updateCardData('Hôm nay')"
+                      onclick="updateCardData('Hôm nay', <%= bills.length %>)"
                       >Hôm nay</a
                     >
                   </li>
@@ -42,7 +42,7 @@
                     <a
                       class="dropdown-item"
                       href="#"
-                      onclick="updateCardData('Tháng này')"
+                      onclick="updateCardData('Tháng này', <%= billsThisMonth.length %>)"
                       >Tháng này</a
                     >
                   </li>
@@ -50,7 +50,7 @@
                     <a
                       class="dropdown-item"
                       href="#"
-                      onclick="updateCardData('Năm nay')"
+                      onclick="updateCardData('Năm nay', <%= billsThisYear.length %>)"
                       >Năm nay</a
                     >
                   </li>
@@ -69,7 +69,10 @@
                     <i class="bi bi-cart"></i>
                   </div>
                   <div class="ps-3">
-                    <h6 id="billsCount"><%= bills.length%></h6>
+                    <h6 id="billsCount"><%= bills.length %></h6>
+                    <span class="text-success small pt-1 fw-bold"
+                      >Đơn hàng</span
+                    >
                   </div>
                 </div>
               </div>
@@ -120,19 +123,44 @@
                 <a class="icon" href="#" data-bs-toggle="dropdown"
                   ><i class="bi bi-three-dots"></i
                 ></a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <ul
+                  class="dropdown-menu dropdown-menu-end dropdown-menu-arrow"
+                  id="revenueFilterDropdown"
+                >
                   <li class="dropdown-header text-start">
                     <h6>Bộ lọc</h6>
                   </li>
-
-                  <li><a class="dropdown-item" href="#">Hôm nay</a></li>
-                  <li><a class="dropdown-item" href="#">Tháng này</a></li>
-                  <li><a class="dropdown-item" href="#">Năm nay</a></li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="updateRevenueCardData('Hôm nay', <%= totalRevenueToday %>)"
+                      >Hôm nay</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="updateRevenueCardData('Tháng này', <%= totalRevenueThisMonth %>)"
+                      >Tháng này</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="updateRevenueCardData('Năm nay', <%= totalRevenueThisYear %>)"
+                      >Năm nay</a
+                    >
+                  </li>
                 </ul>
               </div>
 
               <div class="card-body">
-                <h5 class="card-title">Doanh thu<span>| Tháng này</span></h5>
+                <h5 class="card-title">
+                  Doanh thu<span id="revenueFilterSpan">| Tháng này</span>
+                </h5>
 
                 <div class="d-flex align-items-center">
                   <div
@@ -141,7 +169,7 @@
                     <i class="bi bi-currency-exchange"></i>
                   </div>
                   <div class="ps-3">
-                    <h6><%= totalRevenueThisMonth %></h6>
+                    <h6 id="totalRevenue"><%= totalRevenueThisMonth %></h6>
                     <span class="text-success small pt-1 fw-bold">VNĐ</span>
                   </div>
                 </div>
@@ -173,22 +201,25 @@
 
                 <!-- Line Chart -->
                 <div id="reportsChart"></div>
+                <p class="d-none" id="categories"><%= categories %></p>
+                <p class="d-none" id="data"><%= data %></p>
 
                 <script>
+                  var categoriesText =
+                    document.getElementById("categories").innerHTML;
+                  var dataText = document.getElementById("data").innerHTML;
+
+                  var timeArray = categoriesText.split(",");
+                  var dataArray = dataText.split(",").map(Number);
+
+                  console.log("categories", categories);
+                  console.log("data", data);
                   document.addEventListener("DOMContentLoaded", () => {
                     new ApexCharts(document.querySelector("#reportsChart"), {
                       series: [
                         {
                           name: "Sales",
-                          data: [31, 40, 28, 51, 42, 82, 56],
-                        },
-                        {
-                          name: "Revenue",
-                          data: [11, 32, 45, 32, 34, 52, 41],
-                        },
-                        {
-                          name: "Customers",
-                          data: [15, 11, 32, 18, 9, 24, 11],
+                          data: dataArray,
                         },
                       ],
                       chart: {
@@ -220,15 +251,7 @@
                       },
                       xaxis: {
                         type: "datetime",
-                        categories: [
-                          "2018-09-19T00:00:00.000Z",
-                          "2018-09-19T01:30:00.000Z",
-                          "2018-09-19T02:30:00.000Z",
-                          "2018-09-19T03:30:00.000Z",
-                          "2018-09-19T04:30:00.000Z",
-                          "2018-09-19T05:30:00.000Z",
-                          "2018-09-19T06:30:00.000Z",
-                        ],
+                        categories: timeArray,
                       },
                       tooltip: {
                         x: {
@@ -807,15 +830,22 @@
 <!-- End #main -->
 
 <script>
-  function updateCardData(filter) {
+  function updateCardData(filter, billsCount) {
     // Đặt nội dung của thẻ title
     document.getElementById("filterSpan").innerText = `| ${filter}`;
 
-    // Thực hiện logic cập nhật dữ liệu khác tùy thuộc vào filter ở đây
-
-    // Ví dụ cập nhật số lượng hóa đơn
-    const billsCount = // Thực hiện logic lấy số lượng hóa đơn tương ứng với filter
-      (document.getElementById("billsCount").innerText = billsCount);
+    // Cập nhật số lượng hóa đơn
+    document.getElementById("billsCount").innerText = billsCount;
   }
 </script>
+<script>
+  function updateRevenueCardData(filter, totalRevenue) {
+    // Đặt nội dung của thẻ title
+    document.getElementById("revenueFilterSpan").innerText = `| ${filter}`;
+
+    // Cập nhật tổng doanh thu
+    document.getElementById("totalRevenue").innerText = totalRevenue;
+  }
+</script>
+
 <%- include('../inc/footer.ejs') %>

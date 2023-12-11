@@ -1,4 +1,5 @@
 var productModel = require("../models/product.model");
+var restaurantModel = require("../models/restaurant.model");
 const { History } = require("../models/history.js");
 const firebase = require("../firebase/index.js");
 process.env.TZ = "Asia/Ho_Chi_Minh";
@@ -176,10 +177,70 @@ exports.addProduct = async (req, res, next) => {
 
 exports.getListProduct = async (req, res, next) => {
   try {
-    const products = await productModel.productModel.find({
-      isHide: false,
+    const listrestaurant = await restaurantModel.restaurantModel.find();
+
+    let productsQuery = { isHide: false };
+
+    if (
+      req.query.categoryFilter &&
+      req.query.categoryFilter.trim().toLowerCase() !== "tatca"
+    ) {
+      productsQuery.category = req.query.categoryFilter.trim();
+    }
+
+    if (
+      req.query.restaurantFilter &&
+      req.query.restaurantFilter.trim().toLowerCase() !== "tatca"
+    ) {
+      productsQuery.restaurantId = req.query.restaurantFilter.trim();
+    }
+
+    const itemsPerPage = 5;
+    const page = parseInt(req.query.page) || 1;
+
+    const totalCount = await productModel.productModel.countDocuments(
+      productsQuery
+    );
+    const totalPages = Math.ceil(totalCount / itemsPerPage);
+    const skip = (page - 1) * itemsPerPage;
+
+    const products = await productModel.productModel
+      .find(productsQuery)
+      .skip(skip)
+      .limit(itemsPerPage);
+
+    const restaurantIds = products.map((product) => product.restaurantId);
+
+    const restaurants = await restaurantModel.restaurantModel.find({
+      _id: { $in: restaurantIds },
     });
-    res.render("product/listProduct", { list: products, req: req });
+
+    const restaurantMap = new Map();
+    restaurants.forEach((restaurant) => {
+      restaurantMap.set(restaurant._id.toString(), restaurant.name);
+    });
+
+    const productsWithRestaurantName = products.map((product) => {
+      return {
+        ...product.toObject(),
+        restaurantName: restaurantMap.get(product.restaurantId.toString()),
+      };
+    });
+
+    const pagination = {
+      currentPage: page,
+      totalItems: totalCount,
+      itemsPerPage: itemsPerPage,
+      totalPages: totalPages,
+      baseUrl: "/listproduct",
+    };
+
+    res.render("product/listProduct", {
+      list: productsWithRestaurantName,
+      listRestaurant: listrestaurant,
+      pagination: pagination,
+      req: req,
+    });
   } catch (error) {
     return res.status(204).json({ msg: error.message });
   }
@@ -206,19 +267,23 @@ exports.getRevenue = async (req, res, next) => {
   const startOfThisYear = moment().startOf("year").toISOString();
 
   try {
-    // Lấy các hóa đơn trong ngày
+    // Lấy các hóa đơn trong ngày có status = 4
     const billsToday = await History.find({
       time: { $gte: startOfToday },
+      status: 3,
     });
 
-    // Lấy các hóa đơn trong tháng
+    // Lấy các hóa đơn trong tháng có status = 4
     const billsThisMonth = await History.find({
       time: { $gte: startOfThisMonth },
+      status: 3,
     });
+    const dataForChartMonth = organizeDataByHour(billsThisMonth);
 
-    // Lấy các hóa đơn trong năm
+    // Lấy các hóa đơn trong năm có status = 4
     const billsThisYear = await History.find({
       time: { $gte: startOfThisYear },
+      status: 3,
     });
 
     // Tạo mảng userIds từ các hóa đơn
@@ -262,9 +327,51 @@ exports.getRevenue = async (req, res, next) => {
       totalRevenueToday: totalRevenueToday,
       totalRevenueThisMonth: totalRevenueThisMonth,
       totalRevenueThisYear: totalRevenueThisYear,
+      categories: dataForChartMonth.categories,
+      data: dataForChartMonth.data,
     });
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu từ bảng Bill:", error);
     res.status(500).send("Đã xảy ra lỗi khi lấy dữ liệu từ bảng Bill");
   }
 };
+
+function organizeDataByHour(bills) {
+  // Chuyển đổi bills thành mảng chứa thời gian đã làm tròn và số lượng
+  const roundedTimes = bills.map((bill) => {
+    const time = new Date(bill.time);
+    const roundedTime = new Date(
+      time.getFullYear(),
+      time.getMonth(),
+      time.getDate(),
+      Math.floor(time.getHours() / 2) * 2
+    );
+    return { time: roundedTime, count: 1 };
+  });
+
+  // Sắp xếp mảng theo thứ tự tăng dần
+  roundedTimes.sort((a, b) => a.time - b.time);
+
+  // Tạo mảng data
+  const data = [];
+
+  // Điền data từ mảng đã sắp xếp
+  roundedTimes.forEach((roundedTime) => {
+    const hourKey = roundedTime.time.toISOString();
+    const existingData = data.find((item) => item.time === hourKey);
+
+    if (existingData) {
+      existingData.count += roundedTime.count;
+    } else {
+      data.push({ time: hourKey, count: roundedTime.count });
+    }
+  });
+
+  // Sắp xếp mảng data theo thời gian
+  data.sort((a, b) => new Date(a.time) - new Date(b.time));
+
+  // Lấy giá trị count để tạo mảng giá trị cho biểu đồ
+  const valuesForChart = data.map((item) => item.count);
+
+  return { categories: data.map((item) => item.time), data: valuesForChart };
+}
