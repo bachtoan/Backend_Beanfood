@@ -105,16 +105,41 @@ exports.deletebyUid = async (req, res) => {
   try {
     const uid = req.params.id;
     console.log(uid);
-    const deletedOrder = await Order.deleteMany({ userId: uid });
 
-    if (!deletedOrder) {
-      // Không tìm thấy đơn hàng với UID tương ứng
-      return res
-        .status(404)
-        .json({ msg: "Không tìm thấy đơn hàng với UID đã cung cấp." });
+    const listorderIds = req.body.listorderIds;
+
+    console.log("list order id", listorderIds);
+
+    if (!uid && (!listorderIds || listorderIds.length === 0)) {
+      return res.status(400).json({ msg: "Missing UID or listorderIds" });
     }
+
+    let deleteCondition = {};
+
+    if (uid) {
+      // If UID is provided, delete orders for that UID
+      deleteCondition.userId = uid;
+    }
+
+    if (listorderIds && listorderIds.length > 0) {
+      // If listorderIds is provided, validate and delete orders with those order IDs
+      const validOrderIds = await Order.find({ _id: { $in: listorderIds } }, '_id');
+
+      if (validOrderIds.length !== listorderIds.length) {
+        return res.status(400).json({ msg: "Invalid order IDs in listorderIds" });
+      }
+
+      deleteCondition._id = { $in: listorderIds };
+    }
+
+    const deletedOrders = await Order.deleteMany(deleteCondition);
+
+    if (!deletedOrders || deletedOrders.deletedCount === 0) {
+      return res.status(404).json({ msg: "No orders found for deletion" });
+    }
+
     console.log("Xóa đơn hàng thành công");
-    res.json(deletedOrder);
+    res.json(deletedOrders);
   } catch (error) {
     console.error("Lỗi khi xóa đơn hàng:", error);
     res.status(500).json({ msg: "Lỗi máy chủ nội bộ" });
