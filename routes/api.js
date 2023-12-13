@@ -40,6 +40,11 @@ router.post(
   upload.single("image"),
   apiVoucher.addVoucher
 );
+router.get(
+  "/voucher/getVoucherInRestaurant",
+  apiVoucher.getVoucherInRestaurant
+);
+
 router.get("/voucher/getVoucher", apiVoucher.getVoucher);
 router.post("/voucher/delete/:id", apiVoucher.deleteVoucher);
 router.post("/voucher/decrease", apiVoucher.handleDecreseVoucher);

@@ -3,31 +3,26 @@ const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
 var voucherModel = require("../models/voucher.model");
+var apiVoucher = require("../controllers/voucher.controller");
 
 const moment = require("moment");
-
 exports.createOrderSuccess = async (req, res, next) => {
-  console.log("data", req.body);
   try {
     const OrderSuccess = new historyModel.History(req.body);
-    //   const checkTg = req.body.time;
-    //   const voucherId = req.body?.voucherId;
+    const voucherId = req.body.voucherId;
 
-    // await  voucherModel.voucherModel.findById({ _id: voucherId }).then((data) => {
-    //   //    const date1 = new Date("2023-01-01T12:00:00Z");
-    //   // const date2 = new Date("2023-01-02T12:00:00Z");
-    //   if (date1 < date2) {
-    //     console.log("date1 is before date2");
-    //   } else if (date1 > date2) {
-    //     console.log("date1 is after date2");
-    //   } else {
-    //     console.log("date1 is equal to date2");
-    //   }
-
-    //   });
-
-    let new_OrderSuccess = await OrderSuccess.save();
-    return res.status(200).json({ OrderSuccess: new_OrderSuccess });
+    if (voucherId) {
+      const data = await apiVoucher.handleDecreseVoucher(req, res, next);
+      if (data === 1) {
+        let new_OrderSuccess = await OrderSuccess.save();
+        return res.status(200).json({ OrderSuccess: new_OrderSuccess });
+      } else {
+        return res.status(500).json({ err: "Het voucher" });
+      }
+    } else {
+      let new_OrderSuccess = await OrderSuccess.save();
+      return res.status(200).json({ OrderSuccess: new_OrderSuccess });
+    }
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: error.message });
@@ -52,11 +47,9 @@ exports.getDonHangChiTiet = async (id) => {
 exports.getChiTiet = async (req, res) => {
   try {
     const { id } = req.params;
-
     if (!id) {
       return res.status(400).json({ error: "ID không hợp lệ" });
     }
-
     const chiTietDonHang = await historyModel.History.findOne({
       _id: id,
     }).populate({
@@ -64,11 +57,9 @@ exports.getChiTiet = async (req, res) => {
       select: "name",
       model: "restaurantModel",
     });
-
     if (!chiTietDonHang) {
       return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
     }
-
     res.json(chiTietDonHang);
   } catch (error) {
     console.error(error);

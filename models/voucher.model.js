@@ -9,6 +9,7 @@ const voucherSchema = new mongoose.Schema(
     quantity: Number,
     image: String,
     limit: Number,
+    idUser: [{ type: mongoose.Schema.ObjectId, ref: "userModel" }],
     isHetHan: { type: Boolean, default: false },
     restaurantId: { type: mongoose.Schema.ObjectId, ref: "restaurantModel" },
   },
