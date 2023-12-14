@@ -3,31 +3,26 @@ const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
 var voucherModel = require("../models/voucher.model");
+var apiVoucher = require("../controllers/voucher.controller");
 
 const moment = require("moment");
-
 exports.createOrderSuccess = async (req, res, next) => {
-  console.log("data", req.body);
   try {
     const OrderSuccess = new historyModel.History(req.body);
-    //   const checkTg = req.body.time;
-    //   const voucherId = req.body?.voucherId;
+    const voucherId = req.body.voucherId;
 
-    // await  voucherModel.voucherModel.findById({ _id: voucherId }).then((data) => {
-    //   //    const date1 = new Date("2023-01-01T12:00:00Z");
-    //   // const date2 = new Date("2023-01-02T12:00:00Z");
-    //   if (date1 < date2) {
-    //     console.log("date1 is before date2");
-    //   } else if (date1 > date2) {
-    //     console.log("date1 is after date2");
-    //   } else {
-    //     console.log("date1 is equal to date2");
-    //   }
-
-    //   });
-
-    let new_OrderSuccess = await OrderSuccess.save();
-    return res.status(200).json({ OrderSuccess: new_OrderSuccess });
+    if (voucherId) {
+      const data = await apiVoucher.handleDecreseVoucher(req, res, next);
+      if (data === 1) {
+        let new_OrderSuccess = await OrderSuccess.save();
+        return res.status(200).json({ OrderSuccess: new_OrderSuccess });
+      } else {
+        return res.status(500).json({ err: "Het voucher" });
+      }
+    } else {
+      let new_OrderSuccess = await OrderSuccess.save();
+      return res.status(200).json({ OrderSuccess: new_OrderSuccess });
+    }
   } catch (error) {
     console.log(error);
     return res.status(500).json({ msg: error.message });
@@ -52,11 +47,9 @@ exports.getDonHangChiTiet = async (id) => {
 exports.getChiTiet = async (req, res) => {
   try {
     const { id } = req.params;
-
     if (!id) {
       return res.status(400).json({ error: "ID không hợp lệ" });
     }
-
     const chiTietDonHang = await historyModel.History.findOne({
       _id: id,
     }).populate({
@@ -64,11 +57,9 @@ exports.getChiTiet = async (req, res) => {
       select: "name",
       model: "restaurantModel",
     });
-
     if (!chiTietDonHang) {
       return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
     }
-
     res.json(chiTietDonHang);
   } catch (error) {
     console.error(error);
@@ -352,12 +343,14 @@ exports.getRevenueRestaurant = async (req, res, next) => {
       status: 3,
       "products.restaurantId": restaurantId,
     });
+    const dataForChartToday = organizeDataByHour(billsToday);
     console.log("start today", startOfToday);
     const billsThisMonth = await historyModel.History.find({
       time: { $gte: startOfThisMonth },
       status: 3,
       "products.restaurantId": restaurantId,
     });
+    const dataForChartMonth = organizeDataByMonth(billsThisMonth);
     const billsThisYear = await historyModel.History.find({
       time: { $gte: startOfThisYear },
       status: 3,
@@ -399,9 +392,54 @@ exports.getRevenueRestaurant = async (req, res, next) => {
       totalRevenueToday: totalRevenueToday,
       totalRevenueThisMonth: totalRevenueThisMonth,
       totalRevenueThisYear: totalRevenueThisYear,
+      categoriesToday: dataForChartToday.categories,
+      dataToday: dataForChartToday.data,
+      categoriesMonth: dataForChartMonth.categories,
+      dataMonth: dataForChartMonth.data,
     });
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu từ bảng Bill:", error);
     res.status(500).send("Đã xảy ra lỗi khi lấy dữ liệu từ bảng Bill");
   }
 };
+function organizeDataByHour(bills) {
+  const roundedTimes = bills.map((bill) => {
+    const time = new Date(bill.time);
+    const roundedTime = new Date(
+      time.getFullYear(),
+      time.getMonth(),
+      time.getDate(),
+      Math.floor(time.getHours() / 2) * 2
+    );
+    return { time: roundedTime, count: 1 };
+  });
+
+  roundedTimes.sort((a, b) => a.time - b.time);
+
+  const data = [];
+
+  roundedTimes.forEach((roundedTime) => {
+    const hourKey = roundedTime.time.toISOString();
+    const existingData = data.find((item) => item.time === hourKey);
+
+    if (existingData) {
+      existingData.count += roundedTime.count;
+    } else {
+      data.push({ time: hourKey, count: roundedTime.count });
+    }
+  });
+
+  data.sort((a, b) => new Date(a.time) - new Date(b.time));
+  const valuesForChart = data.map((item) => item.count);
+
+  return { categories: data.map((item) => item.time), data: valuesForChart };
+}
+function organizeDataByMonth(bills) {
+  const uniqueDays = [...new Set(bills.map(bill => new Date(bill.time).toISOString().split('T')[0]))];
+  const categories = uniqueDays.sort();
+
+  const data = categories.map(day => bills.filter(bill => new Date(bill.time).toISOString().split('T')[0] === day).length);
+  console.log(categories, data);
+  return { categories, data };
+}
+

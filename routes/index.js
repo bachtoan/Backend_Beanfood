@@ -23,14 +23,7 @@ router.get("/showProduct", async function (req, res, next) {
     req: req,
   });
 });
-router.get("/editProduct/:id", async function (req, res, next) {
-  const data = await product.editProduct(req, res);
-  res.render("product/editProduct", {
-    title: "Express",
-    req: req,
-    product: data,
-  });
-});
+
 router.get("/editVoucher/:id", async function (req, res, next) {
   const data = await apiVoucher.detailVoucher(req, res);
   res.render("voucher/editvoucher", {

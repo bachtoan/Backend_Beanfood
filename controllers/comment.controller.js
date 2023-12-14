@@ -1,24 +1,23 @@
 var commentModel = require("../models/comment.model");
 exports.getComment = async (req, res, next) => {
-  const idProduct = req.params.idProduct;
   try {
     let list = await commentModel.commentModel
-      .find({
-        idProduct: idProduct,
-      })
+      .find()
       .populate({ path: "idUser", select: "username avatar" })
       .populate({ path: "idProduct", select: "name images _id" })
       .exec();
-      console.log('id', idProduct);
-    if (list) {
+    if (list && list.length > 0) {
       return res
         .status(200)
-        .json({ data: list, msg: "Lấy  dữ liệu comment thành công" });
+        .json({ data: list, msg: "Lấy dữ liệu comment thành công" });
     } else {
-      return res.status(400).json({ msg: "Không có dữ liệu" });
+      return res.status(404).json({ msg: "Không có dữ liệu comment" });
     }
   } catch (error) {
-    return res.status(500).json({ msg: error.message });
+    console.error("Lỗi khi lấy dữ liệu comment:", error);
+    return res
+      .status(500)
+      .json({ msg: "Có lỗi xảy ra khi lấy dữ liệu comment" });
   }
 };
 exports.getAllComment = async (req, res, next) => {
