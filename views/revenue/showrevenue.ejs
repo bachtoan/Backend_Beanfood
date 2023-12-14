@@ -1,5 +1,3 @@
-<!-- revenue.ejs -->
-
 <%- include('../inc/header-user.ejs') %>
 <main id="main" class="main">
   <div class="pagetitle">
@@ -19,7 +17,7 @@
       <div class="col-lg-8">
         <div class="row">
           <!-- Sales Card -->
-          <div class="col-xxl-4 col-md-6">
+          <div class="col-xxl-6 col-md-6">
             <div class="card info-card sales-card">
               <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown"
@@ -36,7 +34,7 @@
                     <a
                       class="dropdown-item"
                       href="#"
-                      onclick="updateCardData('Hôm nay')"
+                      onclick="updateCardData('Hôm nay', <%= bills.length %>)"
                       >Hôm nay</a
                     >
                   </li>
@@ -44,7 +42,7 @@
                     <a
                       class="dropdown-item"
                       href="#"
-                      onclick="updateCardData('Tháng này')"
+                      onclick="updateCardData('Tháng này', <%= billsThisMonth.length %>)"
                       >Tháng này</a
                     >
                   </li>
@@ -52,7 +50,7 @@
                     <a
                       class="dropdown-item"
                       href="#"
-                      onclick="updateCardData('Năm nay')"
+                      onclick="updateCardData('Năm nay', <%= billsThisYear.length %>)"
                       >Năm nay</a
                     >
                   </li>
@@ -71,70 +69,61 @@
                     <i class="bi bi-cart"></i>
                   </div>
                   <div class="ps-3">
-                    <h6 id="billsCount"><%= bills.length%></h6>
+                    <h6 id="billsCount"><%= bills.length %></h6>
+                    <span class="text-success small pt-1 fw-bold"
+                      >Đơn hàng</span
+                    >
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <!-- End Sales Card -->
-
-          <!-- Bills Card -->
-          <div class="col-xxl-4 col-md-6">
-            <div class="card info-card revenue-card">
-              <div class="filter">
-                <a class="icon" href="#" data-bs-toggle="dropdown"
-                  ><i class="bi bi-three-dots"></i
-                ></a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                  <li class="dropdown-header text-start">
-                    <h6>Bộ lọc</h6>
-                  </li>
-
-                  <li><a class="dropdown-item" href="#">Hôm nay</a></li>
-                  <li><a class="dropdown-item" href="#">Tháng này</a></li>
-                  <li><a class="dropdown-item" href="#">Năm</a></li>
-                </ul>
-              </div>
-
-              <div class="card-body">
-                <h5 class="card-title">Tổng đơn <span>| Tháng này</span></h5>
-
-                <div class="d-flex align-items-center">
-                  <div
-                    class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                  >
-                    <i class="bi bi-cart-check-fill"></i>
-                  </div>
-                  <div class="ps-3">
-                    <h6><%= billsThisMonth.length %></h6>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- End Bills Card -->
-
           <!-- Revenue Card -->
-          <div class="col-xxl-4 col-xl-12">
+          <div class="col-xxl-6 col-xl-12">
             <div class="card info-card customers-card">
               <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown"
                   ><i class="bi bi-three-dots"></i
                 ></a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <ul
+                  class="dropdown-menu dropdown-menu-end dropdown-menu-arrow"
+                  id="revenueFilterDropdown"
+                >
                   <li class="dropdown-header text-start">
                     <h6>Bộ lọc</h6>
                   </li>
-
-                  <li><a class="dropdown-item" href="#">Hôm nay</a></li>
-                  <li><a class="dropdown-item" href="#">Tháng này</a></li>
-                  <li><a class="dropdown-item" href="#">Năm nay</a></li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="updateRevenueCardData('Hôm nay', <%= totalRevenueToday %>)"
+                      >Hôm nay</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="updateRevenueCardData('Tháng này', <%= totalRevenueThisMonth %>)"
+                      >Tháng này</a
+                    >
+                  </li>
+                  <li>
+                    <a
+                      class="dropdown-item"
+                      href="#"
+                      onclick="updateRevenueCardData('Năm nay', <%= totalRevenueThisYear %>)"
+                      >Năm nay</a
+                    >
+                  </li>
                 </ul>
               </div>
 
               <div class="card-body">
-                <h5 class="card-title">Doanh thu<span>| Tháng này</span></h5>
+                <h5 class="card-title">
+                  Doanh thu<span id="revenueFilterSpan">| Tháng này</span>
+                </h5>
 
                 <div class="d-flex align-items-center">
                   <div
@@ -143,7 +132,7 @@
                     <i class="bi bi-currency-exchange"></i>
                   </div>
                   <div class="ps-3">
-                    <h6><%= totalRevenueThisMonth %></h6>
+                    <h6 id="totalRevenue"><%= totalRevenueThisMonth %></h6>
                     <span class="text-success small pt-1 fw-bold">VNĐ</span>
                   </div>
                 </div>
@@ -175,22 +164,31 @@
 
                 <!-- Line Chart -->
                 <div id="reportsChart"></div>
-
+                <p class="d-none" id="categories"><%= categoriesToday %></p>
+                <p class="d-none" id="data"><%= dataToday %></p>
+                <p class="d-none" id="categoriesMonth"><%= categoriesMonth %></p>
+                <p class="d-none" id="dataMonth"><%= dataMonth %></p>
                 <script>
+                  var categoriesToday =
+                    document.getElementById("categories").innerHTML;
+                  var dataToday = document.getElementById("data").innerHTML;
+
+                  var timeArrayToday = categoriesToday.split(",");
+                  var dataArrayToday = dataToday.split(",").map(Number);
+                  //Month
+                  var categoriesMonth =
+                    document.getElementById("categoriesMonth").innerHTML;
+                  var dataMonth = document.getElementById("dataMonth").innerHTML;
+
+                  var timeArrayMonth = categoriesMonth.split(",");
+                  var dataArrayMonth = dataMonth.split(",").map(Number);
+
                   document.addEventListener("DOMContentLoaded", () => {
                     new ApexCharts(document.querySelector("#reportsChart"), {
                       series: [
                         {
                           name: "Sales",
-                          data: [31, 40, 28, 51, 42, 82, 56],
-                        },
-                        {
-                          name: "Revenue",
-                          data: [11, 32, 45, 32, 34, 52, 41],
-                        },
-                        {
-                          name: "Customers",
-                          data: [15, 11, 32, 18, 9, 24, 11],
+                          data: dataArrayMonth,
                         },
                       ],
                       chart: {
@@ -222,15 +220,7 @@
                       },
                       xaxis: {
                         type: "datetime",
-                        categories: [
-                          "2018-09-19T00:00:00.000Z",
-                          "2018-09-19T01:30:00.000Z",
-                          "2018-09-19T02:30:00.000Z",
-                          "2018-09-19T03:30:00.000Z",
-                          "2018-09-19T04:30:00.000Z",
-                          "2018-09-19T05:30:00.000Z",
-                          "2018-09-19T06:30:00.000Z",
-                        ],
+                        categories: timeArrayMonth,
                       },
                       tooltip: {
                         x: {
@@ -809,15 +799,22 @@
 <!-- End #main -->
 
 <script>
-  function updateCardData(filter) {
+  function updateCardData(filter, billsCount) {
     // Đặt nội dung của thẻ title
     document.getElementById("filterSpan").innerText = `| ${filter}`;
 
-    // Thực hiện logic cập nhật dữ liệu khác tùy thuộc vào filter ở đây
-
-    // Ví dụ cập nhật số lượng hóa đơn
-    const billsCount = // Thực hiện logic lấy số lượng hóa đơn tương ứng với filter
-      (document.getElementById("billsCount").innerText = billsCount);
+    // Cập nhật số lượng hóa đơn
+    document.getElementById("billsCount").innerText = billsCount;
   }
 </script>
+<script>
+  function updateRevenueCardData(filter, totalRevenue) {
+    // Đặt nội dung của thẻ title
+    document.getElementById("revenueFilterSpan").innerText = `| ${filter}`;
+
+    // Cập nhật tổng doanh thu
+    document.getElementById("totalRevenue").innerText = totalRevenue;
+  }
+</script>
+
 <%- include('../inc/footer.ejs') %>
