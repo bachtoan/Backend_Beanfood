@@ -343,12 +343,14 @@ exports.getRevenueRestaurant = async (req, res, next) => {
       status: 3,
       "products.restaurantId": restaurantId,
     });
+    const dataForChartToday = organizeDataByHour(billsToday);
     console.log("start today", startOfToday);
     const billsThisMonth = await historyModel.History.find({
       time: { $gte: startOfThisMonth },
       status: 3,
       "products.restaurantId": restaurantId,
     });
+    const dataForChartMonth = organizeDataByMonth(billsThisMonth);
     const billsThisYear = await historyModel.History.find({
       time: { $gte: startOfThisYear },
       status: 3,
@@ -390,9 +392,54 @@ exports.getRevenueRestaurant = async (req, res, next) => {
       totalRevenueToday: totalRevenueToday,
       totalRevenueThisMonth: totalRevenueThisMonth,
       totalRevenueThisYear: totalRevenueThisYear,
+      categoriesToday: dataForChartToday.categories,
+      dataToday: dataForChartToday.data,
+      categoriesMonth: dataForChartMonth.categories,
+      dataMonth: dataForChartMonth.data,
     });
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu từ bảng Bill:", error);
     res.status(500).send("Đã xảy ra lỗi khi lấy dữ liệu từ bảng Bill");
   }
 };
+function organizeDataByHour(bills) {
+  const roundedTimes = bills.map((bill) => {
+    const time = new Date(bill.time);
+    const roundedTime = new Date(
+      time.getFullYear(),
+      time.getMonth(),
+      time.getDate(),
+      Math.floor(time.getHours() / 2) * 2
+    );
+    return { time: roundedTime, count: 1 };
+  });
+
+  roundedTimes.sort((a, b) => a.time - b.time);
+
+  const data = [];
+
+  roundedTimes.forEach((roundedTime) => {
+    const hourKey = roundedTime.time.toISOString();
+    const existingData = data.find((item) => item.time === hourKey);
+
+    if (existingData) {
+      existingData.count += roundedTime.count;
+    } else {
+      data.push({ time: hourKey, count: roundedTime.count });
+    }
+  });
+
+  data.sort((a, b) => new Date(a.time) - new Date(b.time));
+  const valuesForChart = data.map((item) => item.count);
+
+  return { categories: data.map((item) => item.time), data: valuesForChart };
+}
+function organizeDataByMonth(bills) {
+  const uniqueDays = [...new Set(bills.map(bill => new Date(bill.time).toISOString().split('T')[0]))];
+  const categories = uniqueDays.sort();
+
+  const data = categories.map(day => bills.filter(bill => new Date(bill.time).toISOString().split('T')[0] === day).length);
+  console.log(categories, data);
+  return { categories, data };
+}
+
