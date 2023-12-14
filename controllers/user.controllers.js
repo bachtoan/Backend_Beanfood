@@ -55,23 +55,35 @@ exports.listUser = async (req, res, next) => {
     return res.status(500).json({ msg: error.message });
   }
 };
-
 exports.register = async (req, res, next) => {
-  console.log(req.body.rePassword);
-  if (req.body.password != req.body.rePassword) {
-    return res.status(500).json({ msg: "Mật khẩu nhập lại không đúng" });
-  } else {
-    try {
-      const salt = await bcrypt.genSalt(10);
-      const user = new userModel.userModel(req.body);
-      user.password = await bcrypt.hash(req.body.password, salt);
-      await user.generateAuthToken();
-      let new_u = await user.save();
-      return res.status(200).json({ user: new_u });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({ msg: error.message });
+  try {
+    // Kiểm tra tên ngdung
+    const existingUsername = await userModel.userModel.findOne({
+      username: req.body.username,
+    });
+    if (existingUsername) {
+      return res.status(501).json({ msg: "Tên người dùng đã được sử dụng" });
     }
+    // Kiểm tra sdt
+    const existingPhone = await userModel.userModel.findOne({
+      phone: req.body.phone,
+    });
+    if (existingPhone) {
+      return res.status(502).json({ msg: "Số điện thoại đã được sử dụng" });
+    }
+    if (req.body.password !== req.body.rePassword) {
+      return res.status(500).json({ msg: "Mật khẩu nhập lại không đúng" });
+    }
+    //
+    const salt = await bcrypt.genSalt(10);
+    const user = new userModel.userModel(req.body);
+    user.password = await bcrypt.hash(req.body.password, salt);
+    await user.generateAuthToken();
+    let new_u = await user.save();
+    return res.status(200).json({ user: new_u });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: error.message });
   }
 };
 exports.update = async (req, res, next) => {

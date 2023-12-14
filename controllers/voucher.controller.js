@@ -4,18 +4,46 @@ const moment = require("moment");
 const firebase = require("../firebase/index.js");
 exports.getVoucher = async (req, res, next) => {
   const id = req.session.user?._id;
+  console.log(id);
   try {
     const currentTime = moment();
     const list = await voucherModel.voucherModel.find({
       restaurantId: id,
-      hsd: { $lt: currentTime.toISOString() },
+      hsd: { $gte: currentTime.toISOString() },
     });
     return list;
   } catch (error) {
     return res.status(500).json({ msg: error.message });
   }
 };
-
+exports.decrease = async (req, res, next) => {
+  const id = req.session.user?._id;
+  try {
+    const currentTime = moment();
+    const list = await voucherModel.voucherModel.find({
+      restaurantId: id,
+      hsd: { $gte: currentTime.toISOString() },
+    });
+    return list;
+  } catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+};
+exports.getVoucherInRestaurant = async (req, res, next) => {
+  const id = req.body.restaurantId;
+  try {
+    const currentTime = moment();
+    const list = await voucherModel.voucherModel.find({
+      restaurantId: id,
+      hsd: { $gte: currentTime.toISOString() },
+    });
+    return res.json({
+      list: list,
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+};
 exports.tinhtoansovoucherhethang = async (req, res, next) => {
   const id = req.session.user?._id;
   try {
@@ -32,7 +60,9 @@ exports.tinhtoansovoucherhethang = async (req, res, next) => {
   }
 };
 exports.handleDecreseVoucher = async (req, res, next) => {
-  const id = req.body.idVoucher;
+  const id = req.body.voucherId;
+
+  const userId = req.body.userId;
   try {
     const voucher = await voucherModel.voucherModel.findById({ _id: id });
     if (!voucher) {
@@ -40,15 +70,14 @@ exports.handleDecreseVoucher = async (req, res, next) => {
     }
     if (voucher.quantity == 0) {
       await voucherModel.voucherModel.findByIdAndDelete({ _id: id });
-      return res.json({
-        status: 200,
-        message: "Số lượng voucher đã  hết",
-      });
+      return -1;
     }
     if (voucher.quantity > 0) {
       voucher.quantity--;
-      const updatedVoucher = await voucher.save();
-      return res.json(updatedVoucher);
+      voucher.idUser = [...(voucher.idUser ?? []), userId];
+      console.log("vao day");
+      await voucher.save();
+      return 1;
     } else {
       return res.status(400).json({ msg: "Voucher is out of stock" });
     }
@@ -56,7 +85,6 @@ exports.handleDecreseVoucher = async (req, res, next) => {
     return res.status(500).json({ msg: error.message });
   }
 };
-
 exports.deleteVoucher = async (req, res, next) => {
   const id = req.params.id;
   console.log(id);
