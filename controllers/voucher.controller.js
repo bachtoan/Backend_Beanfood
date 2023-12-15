@@ -16,6 +16,27 @@ exports.getVoucher = async (req, res, next) => {
     return res.status(500).json({ msg: error.message });
   }
 };
+exports.huyDonHang = async (req, res, next) => {
+  const userId = req.body.userId;
+  const voucherId = req.body.voucherId;
+
+  try {
+    const currentTime = moment();
+    await voucherModel.voucherModel.findOneAndUpdate(
+      {
+        _id: voucherId,
+        hsd: { $gte: currentTime.toISOString() },
+        idUser: { $in: [userId] },
+      },
+      {
+        $inc: { quantity: 1 },
+        $pull: { idUser: userId },
+      },
+      { new: true }
+    );
+  } catch (error) {}
+};
+
 exports.decrease = async (req, res, next) => {
   const id = req.session.user?._id;
   try {
@@ -44,6 +65,9 @@ exports.getVoucherInRestaurant = async (req, res, next) => {
     return res.status(500).json({ msg: error.message });
   }
 };
+
+// exports.huyDonHang = (req, res, next) => {};
+
 exports.tinhtoansovoucherhethang = async (req, res, next) => {
   const id = req.session.user?._id;
   try {
@@ -75,7 +99,6 @@ exports.handleDecreseVoucher = async (req, res, next) => {
     if (voucher.quantity > 0) {
       voucher.quantity--;
       voucher.idUser = [...(voucher.idUser ?? []), userId];
-      console.log("vao day");
       await voucher.save();
       return 1;
     } else {

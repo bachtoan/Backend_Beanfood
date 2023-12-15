@@ -180,6 +180,10 @@ exports.cancelOrder = async (req, res) => {
     const orderId = req.body.orderId;
     const userIdFromRequest = req.body.userId;
     const order = await historyModel.History.findById(orderId);
+    const voucherId = req.body.voucherId;
+    if (voucherId) {
+      apiVoucher.huyDonHang(req, res);
+    }
     if (!order) {
       return res.status(404).json({ msg: "Không tìm thấy đơn hàng" });
     }
@@ -435,11 +439,19 @@ function organizeDataByHour(bills) {
   return { categories: data.map((item) => item.time), data: valuesForChart };
 }
 function organizeDataByMonth(bills) {
-  const uniqueDays = [...new Set(bills.map(bill => new Date(bill.time).toISOString().split('T')[0]))];
+  const uniqueDays = [
+    ...new Set(
+      bills.map((bill) => new Date(bill.time).toISOString().split("T")[0])
+    ),
+  ];
   const categories = uniqueDays.sort();
 
-  const data = categories.map(day => bills.filter(bill => new Date(bill.time).toISOString().split('T')[0] === day).length);
+  const data = categories.map(
+    (day) =>
+      bills.filter(
+        (bill) => new Date(bill.time).toISOString().split("T")[0] === day
+      ).length
+  );
   console.log(categories, data);
   return { categories, data };
 }
-
