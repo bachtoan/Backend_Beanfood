@@ -392,10 +392,14 @@ exports.getRevenueRestaurant = async (req, res, next) => {
       totalRevenueToday: totalRevenueToday,
       totalRevenueThisMonth: totalRevenueThisMonth,
       totalRevenueThisYear: totalRevenueThisYear,
+
       categoriesToday: dataForChartToday.categories,
       dataToday: dataForChartToday.data,
+      revenueToday: dataForChartToday.revenue,
+
       categoriesMonth: dataForChartMonth.categories,
       dataMonth: dataForChartMonth.data,
+      revenueMonth: dataForChartMonth.revenue,
     });
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu từ bảng Bill:", error);
@@ -411,7 +415,8 @@ function organizeDataByHour(bills) {
       time.getDate(),
       Math.floor(time.getHours() / 2) * 2
     );
-    return { time: roundedTime, count: 1 };
+    const revenue = parseFloat(bill.toltalprice) || 0; // Chuyển đổi thành số và mặc định là 0 nếu không phải số
+    return { time: roundedTime, revenue, count: 1 };
   });
 
   roundedTimes.sort((a, b) => a.time - b.time);
@@ -424,22 +429,57 @@ function organizeDataByHour(bills) {
 
     if (existingData) {
       existingData.count += roundedTime.count;
+      existingData.revenue += roundedTime.revenue;
     } else {
-      data.push({ time: hourKey, count: roundedTime.count });
+      data.push({
+        time: hourKey,
+        count: roundedTime.count,
+        revenue: roundedTime.revenue,
+      });
     }
   });
 
   data.sort((a, b) => new Date(a.time) - new Date(b.time));
   const valuesForChart = data.map((item) => item.count);
 
-  return { categories: data.map((item) => item.time), data: valuesForChart };
+  return {
+    categories: data.map((item) => item.time),
+    data: valuesForChart,
+    revenue: data.map((item) => item.revenue),
+  };
 }
+
 function organizeDataByMonth(bills) {
-  const uniqueDays = [...new Set(bills.map(bill => new Date(bill.time).toISOString().split('T')[0]))];
+  // Lấy ra các ngày (không bao gồm giờ) duy nhất từ danh sách hóa đơn
+  const uniqueDays = [
+    ...new Set(
+      bills.map((bill) =>
+        new Date(bill.time).toISOString().split("T")[0].trim()
+      )
+    ),
+  ];
+
+  // Sắp xếp ngày tăng dần
   const categories = uniqueDays.sort();
 
-  const data = categories.map(day => bills.filter(bill => new Date(bill.time).toISOString().split('T')[0] === day).length);
-  console.log(categories, data);
-  return { categories, data };
+  // Tính số lượng hóa đơn cho mỗi ngày
+  const data = categories.map(
+    (day) =>
+      bills.filter((bill) => {
+        const billDate = new Date(bill.time).toISOString().split("T")[0].trim();
+        return billDate === day;
+      }).length
+  );
+
+  // Tính tổng doanh thu cho mỗi ngày
+  const revenue = categories.map((day) =>
+    bills
+      .filter(
+        (bill) => new Date(bill.time).toISOString().split("T")[0].trim() === day
+      )
+      .reduce((total, bill) => total + bill.toltalprice, 0)
+  );
+  return { categories, data, revenue };
 }
+
 

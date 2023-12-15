@@ -79,6 +79,7 @@
             </div>
           </div>
           <!-- End Sales Card -->
+
           <!-- Revenue Card -->
           <div class="col-xxl-6 col-xl-12">
             <div class="card info-card customers-card">
@@ -148,88 +149,47 @@
                 <a class="icon" href="#" data-bs-toggle="dropdown"
                   ><i class="bi bi-three-dots"></i
                 ></a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <ul
+                  class="dropdown-menu dropdown-menu-end dropdown-menu-arrow"
+                  id="reports"
+                >
                   <li class="dropdown-header text-start">
                     <h6>Filter</h6>
                   </li>
-
-                  <li><a class="dropdown-item" href="#">Today</a></li>
-                  <li><a class="dropdown-item" href="#">This Month</a></li>
-                  <li><a class="dropdown-item" href="#">This Year</a></li>
+                  <li>
+                    <a class="dropdown-item" href="#" data-filter="Today"
+                      >Today</a
+                    >
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#" data-filter="This Month"
+                      >This Month</a
+                    >
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#" data-filter="This Year"
+                      >This Year</a
+                    >
+                  </li>
                 </ul>
               </div>
 
               <div class="card-body">
-                <h5 class="card-title">Reports <span>/Today</span></h5>
+                <h5 class="card-title">
+                  Reports <span id="reportsTitle">/Today</span>
+                </h5>
 
                 <!-- Line Chart -->
                 <div id="reportsChart"></div>
                 <p class="d-none" id="categories"><%= categoriesToday %></p>
                 <p class="d-none" id="data"><%= dataToday %></p>
-                <p class="d-none" id="categoriesMonth"><%= categoriesMonth %></p>
+                <p class="d-none" id="revenue"><%= revenueToday %></p>
+
+                <p class="d-none" id="categoriesMonth">
+                  <%= categoriesMonth %>
+                </p>
                 <p class="d-none" id="dataMonth"><%= dataMonth %></p>
-                <script>
-                  var categoriesToday =
-                    document.getElementById("categories").innerHTML;
-                  var dataToday = document.getElementById("data").innerHTML;
-
-                  var timeArrayToday = categoriesToday.split(",");
-                  var dataArrayToday = dataToday.split(",").map(Number);
-                  //Month
-                  var categoriesMonth =
-                    document.getElementById("categoriesMonth").innerHTML;
-                  var dataMonth = document.getElementById("dataMonth").innerHTML;
-
-                  var timeArrayMonth = categoriesMonth.split(",");
-                  var dataArrayMonth = dataMonth.split(",").map(Number);
-
-                  document.addEventListener("DOMContentLoaded", () => {
-                    new ApexCharts(document.querySelector("#reportsChart"), {
-                      series: [
-                        {
-                          name: "Sales",
-                          data: dataArrayMonth,
-                        },
-                      ],
-                      chart: {
-                        height: 350,
-                        type: "area",
-                        toolbar: {
-                          show: false,
-                        },
-                      },
-                      markers: {
-                        size: 4,
-                      },
-                      colors: ["#4154f1", "#2eca6a", "#ff771d"],
-                      fill: {
-                        type: "gradient",
-                        gradient: {
-                          shadeIntensity: 1,
-                          opacityFrom: 0.3,
-                          opacityTo: 0.4,
-                          stops: [0, 90, 100],
-                        },
-                      },
-                      dataLabels: {
-                        enabled: false,
-                      },
-                      stroke: {
-                        curve: "smooth",
-                        width: 2,
-                      },
-                      xaxis: {
-                        type: "datetime",
-                        categories: timeArrayMonth,
-                      },
-                      tooltip: {
-                        x: {
-                          format: "dd/MM/yy HH:mm",
-                        },
-                      },
-                    }).render();
-                  });
-                </script>
+                <p class="d-none" id="revenueMonth"><%= revenueMonth %></p>
                 <!-- End Line Chart -->
               </div>
             </div>
@@ -816,5 +776,134 @@
     document.getElementById("totalRevenue").innerText = totalRevenue;
   }
 </script>
+<script>
+  var categoriesToday = document.getElementById("categories").innerHTML;
+  var dataToday = document.getElementById("data").innerHTML;
+  var revenue = document.getElementById("revenue").innerHTML;
 
+  var timeArrayToday = categoriesToday.split(",");
+  var dataArrayToday = dataToday.split(",").map(Number);
+  var revenueArrayDay = revenue.split(",").map(Number);
+
+  //Month
+  var categoriesMonth = document.getElementById("categoriesMonth").innerHTML;
+  var dataMonth = document.getElementById("dataMonth").innerHTML;
+  var revenueMonth = document.getElementById("revenueMonth").innerHTML;
+
+  var timeArrayMonth = categoriesMonth
+    .replace(/\n/g, "") // Loại bỏ ký tự xuống dòng
+    .replace(/\s/g, "") // Loại bỏ khoảng trắng
+    .split(",");
+  var dataArrayMonth = dataMonth.split(",").map(Number);
+  var revenueArrayMonth = revenueMonth.split(",").map(Number);
+  //===========================================================
+  console.log("tiem: ", timeArrayToday);
+  document.addEventListener("DOMContentLoaded", () => {
+    const filterOptions = document.querySelectorAll(
+      ".dropdown-menu .dropdown-item"
+    );
+    const reportsTitle = document.getElementById("reportsTitle");
+
+    let apexChart;
+
+    filterOptions.forEach((option) => {
+      option.addEventListener("click", function () {
+        const filterText = option.getAttribute("data-filter");
+        reportsTitle.innerText = `| ${filterText}`;
+
+        let newCategories, newData, newRevenue;
+
+        if (filterText === "Today") {
+          newCategories = timeArrayToday;
+          newData = dataArrayToday;
+          newRevenue = revenueArrayDay;
+        } else if (filterText === "This Month") {
+          newCategories = timeArrayMonth;
+          newData = dataArrayMonth;
+          newRevenue = revenueArrayMonth;
+        }
+
+        // Kiểm tra xem biểu đồ đã được khởi tạo chưa
+        if (apexChart) {
+          // Cập nhật dữ liệu cho các loại series
+          apexChart.updateSeries([{ data: newData }, { data: newRevenue }]);
+
+          // Cập nhật categories cho trục x
+          apexChart.updateOptions({
+            xaxis: { categories: newCategories },
+          });
+        } else {
+          // Nếu biểu đồ chưa được khởi tạo, hãy tạo mới
+          apexChart = new ApexCharts(document.querySelector("#reportsChart"), {
+            series: [
+              {
+                name: "Bán hàng",
+                type: "line",
+                data: newData,
+              },
+              {
+                name: "Doanh thu",
+                type: "line",
+                data: newRevenue,
+              },
+            ],
+            chart: {
+              height: 350,
+              type: "line",
+              toolbar: {
+                show: false,
+              },
+            },
+            markers: {
+              size: 4,
+            },
+            colors: ["#4154f1", "#2eca6a"],
+            fill: {
+              type: "gradient",
+              gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.3,
+                opacityTo: 0.7,
+                stops: [0, 90, 100],
+              },
+            },
+            dataLabels: {
+              enabled: false,
+            },
+            stroke: {
+              curve: "smooth",
+              width: 2,
+            },
+            xaxis: {
+              type: "datetime",
+              categories: newCategories,
+            },
+            yaxis: [
+              {
+                seriesName: "Sản phẩm",
+                title: {
+                  text: "Sản phẩm",
+                },
+              },
+              {
+                seriesName: "Doanh thu",
+                opposite: true,
+                title: {
+                  text: "Doanh thu",
+                },
+              },
+            ],
+            tooltip: {
+              x: {
+                format: "dd/MM/yy HH:mm",
+              },
+            },
+          });
+
+          apexChart.render();
+        }
+      });
+    });
+  });
+</script>
 <%- include('../inc/footer.ejs') %>
