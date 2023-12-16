@@ -67,6 +67,10 @@ const historySchame = new mongoose.Schema(
       type: Date,
       require: true,
     },
+    voucherId: {
+      type: String,
+      require: false,
+    },
   },
   {
     collection: "Bill",
