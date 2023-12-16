@@ -2,7 +2,7 @@ var historyModel = require("../models/history");
 const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
-var voucherModel = require("../models/voucher.model");
+var voucherModel=require("../models/voucher.model.js");
 var apiVoucher = require("../controllers/voucher.controller");
 
 const moment = require("moment");
@@ -56,7 +56,7 @@ exports.getChiTiet = async (req, res) => {
       path: "products.restaurantId",
       select: "name",
       model: "restaurantModel",
-    });
+    }).populate({ path: "voucherId", select: "money",model: "voucherModel"});
     if (!chiTietDonHang) {
       return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
     }

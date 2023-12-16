@@ -68,8 +68,8 @@ const historySchame = new mongoose.Schema(
       require: true,
     },
     voucherId: {
-      type: String,
-      require: false,
+      type: mongoose.Types.ObjectId,
+      ref: "voucherModel",
     },
   },
   {
