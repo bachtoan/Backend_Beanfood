@@ -27,7 +27,19 @@ exports.getSuggest = async (req, res, next) => {
     return res.status(500).json({ msg: error.message });
   }
 };
-
+// lấy theo danh mục
+exports.getProductDanhMuc = async (req, res, next) => {
+  try {
+    const nameDanhMuc = req.params.category;
+    const products = await productModel.productModel.find({
+      category: nameDanhMuc,
+      isHide: false,
+    }).populate("restaurantId");
+    return res.status(200).json({ products });
+  } catch (error) {
+    return res.status(204).json({ msg: error.message });
+  }
+};
 exports.ngungKinhDoanhProduct = async (req, res, next) => {
   const id = req.params.id;
   const sp = await productModel.productModel.findById({ _id: id });
@@ -111,7 +123,7 @@ exports.getProductByName = async (req, res, next) => {
     const products = await productModel.productModel.find({
       name: { $regex: productName, $options: "i" },
       isHide: false,
-    });
+    }).populate("restaurantId");
 
     if (products.length === 0) {
       return res.status(404).json({ msg: "Không tìm thấy sản phẩm nào." });
@@ -245,20 +257,6 @@ exports.getListProduct = async (req, res, next) => {
       pagination: pagination,
       req: req,
     });
-  } catch (error) {
-    return res.status(204).json({ msg: error.message });
-  }
-};
-
-// lấy theo danh mục
-exports.getProductDanhMuc = async (req, res, next) => {
-  try {
-    const nameDanhMuc = req.params.category;
-    const products = await productModel.productModel.find({
-      category: nameDanhMuc,
-      isHide: false,
-    });
-    return res.status(200).json({ products });
   } catch (error) {
     return res.status(204).json({ msg: error.message });
   }
