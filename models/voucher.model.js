@@ -18,7 +18,7 @@ const voucherSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-voucherModel = db.mongoose.model("voucher", voucherSchema);
+voucherModel = db.mongoose.model("voucherModel", voucherSchema);
 module.exports = {
   voucherModel,
 };
