@@ -44,7 +44,7 @@ router.get(
   "/voucher/getVoucherInRestaurant",
   apiVoucher.getVoucherInRestaurant
 );
-
+router.post("/voucher/huydonhang", apiVoucher.huyDonHang);
 router.get("/voucher/getVoucher", apiVoucher.getVoucher);
 router.post("/voucher/delete/:id", apiVoucher.deleteVoucher);
 router.post("/voucher/decrease", apiVoucher.handleDecreseVoucher);
