@@ -270,7 +270,7 @@ exports.getListProduct = async (req, res, next) => {
 exports.postEvaluate = async (req, res, next) => {
   try {
     const star = Number(req.body.star);
-    let evaluateRecord = await evaluteModel.evaluteModel.findById(
+    let evaluateRecord = await productModel.productModel.findById(
       req.body.productId
     );
 
@@ -287,21 +287,12 @@ exports.postEvaluate = async (req, res, next) => {
         })
         .status(200);
     } else {
-      evaluateRecord = new evaluteModel.evaluteModel({
-        _id: productId,
-        totalEvaluate: 1,
-        totalStar: star,
-        average: star,
-        productId,
-      });
-      await evaluateRecord.save();
-
       return res
         .json({
-          msg: "Đánh giá đã được thêm thành công",
+          msg: "Không tìm thấy sản phẩm",
           data: evaluateRecord,
         })
-        .status(200);
+        .status(500);
     }
   } catch (error) {
     console.error("Lỗi khi xử lý đánh giá:", error);
