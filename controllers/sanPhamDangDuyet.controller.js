@@ -1,6 +1,8 @@
 var sanPhamDangDuyetModel = require("../models/sanPhamDangDuyet.model.js");
 const firebase = require("../firebase/index.js");
 const { productModel } = require("../models/product.model.js");
+var restaurantModel = require("../models/restaurant.model");
+
 exports.addProduct = async (req, res, next) => {
   const id = req.session.user?._id;
   const nameFile = req.file.originalname;
@@ -29,8 +31,24 @@ exports.addProduct = async (req, res, next) => {
 };
 exports.getListProduct = async (req, res, next) => {
   try {
+    // Lấy danh sách sản phẩm
     const products = await sanPhamDangDuyetModel.sanPhamDangDuyetModel.find();
-    console.log(products);
+
+    // Lặp qua từng sản phẩm để lấy tên nhà hàng
+    for (let i = 0; i < products.length; i++) {
+      // Truy vấn để lấy thông tin nhà hàng
+      const restaurantInfo = await restaurantModel.restaurantModel.findById(
+        products[i].restaurantId
+      );
+
+      // Kiểm tra nếu có thông tin nhà hàng
+      if (restaurantInfo) {
+        // Thêm tên nhà hàng vào mỗi sản phẩm
+        products[i].restaurantName = restaurantInfo.name;
+      }
+    }
+
+    // Render view với danh sách sản phẩm đã được cập nhật
     res.render("product/listProductCensorship", { list: products, req: req });
   } catch (error) {
     return res.status(204).json({ msg: error.message });

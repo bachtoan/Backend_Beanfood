@@ -167,4 +167,6 @@ router.post(
   apiSanPhamDangDuyet.addProduct
 );
 
+//report
+router.post("/evaluate", apiProduct.postEvaluate);
 module.exports = router;

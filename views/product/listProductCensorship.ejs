@@ -12,13 +12,13 @@
         <thead>
           <tr>
             <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Image</th>
-            <th scope="col">Description</th>
-            <th scope="col">Quantity In Stock</th>
-            <th scope="col">Real Price</th>
-            <th scope="col">Discount Price</th>
-            <th scope="col">Category</th>
+            <th scope="col">Tên</th>
+            <th scope="col">Ảnh</th>
+            <th scope="col">Mô tả</th>
+            <th scope="col">Nhà hàng</th>
+            <th scope="col">Giá</th>
+            <th scope="col">Sau giảm giá</th>
+            <th scope="col">Danh mục</th>
           </tr>
         </thead>
         <tbody>
@@ -34,7 +34,7 @@
               />
             </td>
             <td><%= list[i].description %></td>
-            <td><%= list[i].quantityInStock %></td>
+            <td><%= list[i].restaurantId %></td>
             <td><%= list[i].realPrice %></td>
             <td><%= list[i].discountPrice %></td>
             <td><%= list[i].category %></td>

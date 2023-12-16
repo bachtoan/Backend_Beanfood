@@ -5,6 +5,7 @@ const firebase = require("../firebase/index.js");
 process.env.TZ = "Asia/Ho_Chi_Minh";
 const moment = require("moment-timezone");
 const { error } = require("firebase-functions/logger");
+const evaluteModel = require("../models/evaluate.js");
 
 exports.getSuggest = async (req, res, next) => {
   try {
@@ -250,6 +251,49 @@ exports.getListProduct = async (req, res, next) => {
   }
 };
 
+exports.postEvaluate = async (req, res, next) => {
+  try {
+    const star = Number(req.body.star);
+    let evaluateRecord = await evaluteModel.evaluteModel.findById(
+      req.body.productId
+    );
+
+    if (evaluateRecord) {
+      evaluateRecord.totalStar += star;
+      evaluateRecord.totalEvaluate += 1;
+      evaluateRecord.average =
+        evaluateRecord.totalStar / evaluateRecord.totalEvaluate;
+      await evaluateRecord.save();
+      return res
+        .json({
+          msg: "Đánh giá đã được cập nhật thành công",
+          data: evaluateRecord,
+        })
+        .status(200);
+    } else {
+      evaluateRecord = new evaluteModel.evaluteModel({
+        _id: productId,
+        totalEvaluate: 1,
+        totalStar: star,
+        average: star,
+        productId,
+      });
+      await evaluateRecord.save();
+
+      return res
+        .json({
+          msg: "Đánh giá đã được thêm thành công",
+          data: evaluateRecord,
+        })
+        .status(200);
+    }
+  } catch (error) {
+    console.error("Lỗi khi xử lý đánh giá:", error);
+    return res
+      .status(500)
+      .json({ message: "Đã xảy ra lỗi khi xử lý đánh giá" });
+  }
+};
 // lấy theo danh mục
 exports.getProductDanhMuc = async (req, res, next) => {
   try {
