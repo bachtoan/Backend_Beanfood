@@ -51,7 +51,8 @@ exports.decrease = async (req, res, next) => {
   }
 };
 exports.getVoucherInRestaurant = async (req, res, next) => {
-  const id = req.body.restaurantId;
+  const id = req.params.id;
+  console.log("data id" , id);
   try {
     const currentTime = moment();
     const list = await voucherModel.voucherModel.find({

@@ -8,6 +8,7 @@ var sanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 var order = require("../controllers/orderControllers");
 const history = require("../controllers/historyOrderController");
 var apiVoucher = require("../controllers/voucher.controller");
+var productModel = require("../models/product.model");
 
 var router = express.Router();
 
@@ -20,6 +21,14 @@ router.get("/showProduct", async function (req, res, next) {
   const data = await product.dataProductRestaurant(req, res);
   res.render("product/showProduct", {
     list: data,
+    req: req,
+  });
+});
+router.get("/editProduct/:id", async function (req, res, next) {
+  console.log(req.params.id);
+  const data = await productModel.productModel.findById({ _id: req.params.id });
+  res.render("product/editProduct", {
+    product: data,
     req: req,
   });
 });
