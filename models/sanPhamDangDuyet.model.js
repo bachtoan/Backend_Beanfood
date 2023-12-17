@@ -8,6 +8,7 @@ const productSchema = new mongoose.Schema(
     description: String,
     realPrice: Number,
     category: String,
+    trangthai: { type: Number, default: 0 },
     restaurantId: { type: mongoose.Schema.ObjectId, ref: "restaurantModel" },
   },
   {

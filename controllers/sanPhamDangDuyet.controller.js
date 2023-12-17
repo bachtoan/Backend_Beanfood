@@ -31,24 +31,19 @@ exports.addProduct = async (req, res, next) => {
 };
 exports.getListProduct = async (req, res, next) => {
   try {
-    // Lấy danh sách sản phẩm
-    const products = await sanPhamDangDuyetModel.sanPhamDangDuyetModel.find();
+    const products = await sanPhamDangDuyetModel.sanPhamDangDuyetModel.find({
+      trangthai: 0,
+    });
 
-    // Lặp qua từng sản phẩm để lấy tên nhà hàng
     for (let i = 0; i < products.length; i++) {
-      // Truy vấn để lấy thông tin nhà hàng
       const restaurantInfo = await restaurantModel.restaurantModel.findById(
         products[i].restaurantId
       );
 
-      // Kiểm tra nếu có thông tin nhà hàng
       if (restaurantInfo) {
-        // Thêm tên nhà hàng vào mỗi sản phẩm
         products[i].restaurantName = restaurantInfo.name;
       }
     }
-
-    // Render view với danh sách sản phẩm đã được cập nhật
     res.render("product/listProductCensorship", { list: products, req: req });
   } catch (error) {
     return res.status(204).json({ msg: error.message });
@@ -85,7 +80,54 @@ exports.duyet = async (req, res, next) => {
     );
     res.redirect("/censorship");
   } catch (error) {
-    console.error("Lỗi khi duyệt sản phẩm:", error);
-    res.status(500).send("Đã xảy ra lỗi khi duyệt sản phẩm");
+    res.redirect("/censorship");
+  }
+};
+
+exports.xoa = async (req, res, next) => {
+  const productId = req.params.id;
+  try {
+    const productToApprove =
+      await sanPhamDangDuyetModel.sanPhamDangDuyetModel.findById(productId);
+
+    if (!productToApprove) {
+      return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+    }
+    await sanPhamDangDuyetModel.sanPhamDangDuyetModel.updateOne(
+      { _id: productId },
+      { trangthai: 1 }
+    );
+
+    res.redirect("/censorship");
+  } catch (error) {
+    res.redirect("/censorship");
+  }
+};
+
+exports.xoa = async (req, res, next) => {
+  const productId = req.params.id;
+  console.log(productId);
+};
+exports.listForRes = async (req, res, next) => {
+  try {
+    const products = await sanPhamDangDuyetModel.sanPhamDangDuyetModel.find({
+      restaurantId: req.params.id,
+    });
+
+    for (let i = 0; i < products.length; i++) {
+      const restaurantInfo = await restaurantModel.restaurantModel.findById(
+        products[i].restaurantId
+      );
+
+      if (restaurantInfo) {
+        products[i].restaurantName = restaurantInfo.name;
+      }
+    }
+    res.render("product/listProductCensorshipRes", {
+      list: products,
+      req: req,
+    });
+  } catch (error) {
+    return res.status(204).json({ msg: error.message });
   }
 };

@@ -17,6 +17,9 @@ router.get("/", yeu_cau_dang_nhap);
 router.get("/addProduct", function (req, res, next) {
   res.render("product/addProduct", { title: "Express", req: req });
 });
+router.get("/listCensor/:id", sanPhamDangDuyet.listForRes);
+router.get("/listCensor/huy/:id", sanPhamDangDuyet.huy);
+
 router.get("/showProduct", async function (req, res, next) {
   const data = await product.dataProductRestaurant(req, res);
   res.render("product/showProduct", {
@@ -115,4 +118,6 @@ router.get("/showrevenue", history.getRevenueRestaurant);
 router.get("/orderstatistics", order.getOrdersWeb);
 router.get("/censorship", sanPhamDangDuyet.getListProduct);
 router.get("/censorship/duyet/:id", sanPhamDangDuyet.duyet);
+router.get("/censorship/xoa/:id", sanPhamDangDuyet.xoa);
+
 module.exports = router;
