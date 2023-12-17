@@ -10,13 +10,30 @@
   <body>
     <%- include('../inc/header-user.ejs') %>
     <div style="margin-top: 80px; height: 100vh; margin-left: 320px; flex: 1">
-      <table class="table">
+      <form
+        style="width: 500px"
+        class="d-flex"
+        method="post"
+        action="/api/search"
+      >
+        <input
+          class="form-control me-2"
+          type="search"
+          name="search"
+          placeholder="Search"
+          aria-label="Search"
+        />
+        <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+      <table style="margin-top: 20px" class="table">
         <thead>
           <tr>
             <th scope="col">STT</th>
             <th scope="col">Tên Sản Phẩm</th>
             <th scope="col">Ảnh</th>
             <th scope="col">Gía Bán Hiện Tại</th>
+            <th scope="col">Danh Mục</th>
+
             <th scope="col">Thao Tác</th>
             <th scope="col">Trạng Thái</th>
           </tr>
@@ -34,6 +51,8 @@
               />
             </td>
             <td><%= list[i].realPrice %></td>
+            <td><%= list[i].category %></td>
+
             <td>
               <div class="action">
                 <a href="#">
