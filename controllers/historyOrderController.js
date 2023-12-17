@@ -12,7 +12,7 @@ exports.createOrderSuccess = async (req, res, next) => {
     const OrderSuccess = new historyModel.History(req.body);
     const voucherId = req.body.voucherId;
     await apiNotify.postNotify(req.body);
-    if (voucherId) {
+    if (voucherId && voucherId !== "") {
       const data = await apiVoucher.handleDecreseVoucher(req, res, next);
       if (data === 1) {
         let new_OrderSuccess = await OrderSuccess.save();
