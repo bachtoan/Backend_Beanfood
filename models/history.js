@@ -70,6 +70,7 @@ const historySchame = new mongoose.Schema(
     voucherId: {
       type: mongoose.Types.ObjectId,
       ref: "voucherModel",
+      default: new mongoose.Types.ObjectId(),
     },
   },
   {

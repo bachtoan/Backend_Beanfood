@@ -14,12 +14,7 @@ exports.getNotifyById = async (req, res, next) => {
 };
 exports.postNotify = async (data) => {
   try {
-    const notify = new notifyModel.notifyModel(data);
-    const notifySave = {
-      ...notify,
-      title: notify?.name,
-    };
-    await notifySave.save();
+    await notifyModel.notifyModel.create(data);
   } catch (error) {
     return res.status(500).json({ msg: error.message });
   }
