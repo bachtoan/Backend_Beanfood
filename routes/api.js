@@ -14,7 +14,12 @@ var apiProduct = require("../controllers/product.controller");
 var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 var hisToryModel = require("../models/history");
 var apifavorite = require("../controllers/favoriteController");
+var apiNotify = require("../controllers/notify.controller");
+
 const upload = multer({ storage: multer.memoryStorage() });
+
+//notify
+router.get("/notify/:id", apiNotify.getNotifyById);
 
 //user
 router.get("/users", apiU.listUser);
