@@ -1,11 +1,11 @@
 <%- include('../inc/header-admin.ejs') %>
 <main id="main" class="main">
   <div class="pagetitle">
-    <h1>Revenue</h1>
+    <h1>Doanh Thu</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-        <li class="breadcrumb-item active">Revenue</li>
+        <li class="breadcrumb-item"><a href="index.html">Trang chủ</a></li>
+        <li class="breadcrumb-item active">Doanh thu</li>
       </ol>
     </nav>
   </div>
@@ -145,7 +145,7 @@
           <!-- Reports -->
           <div class="col-12">
             <div class="card">
-              <div class="filter">
+              <div class="filter" id="reports">
                 <a class="icon" href="#" data-bs-toggle="dropdown"
                   ><i class="bi bi-three-dots"></i
                 ></a>
@@ -791,17 +791,21 @@
   var revenueMonth = document.getElementById("revenueMonth").innerHTML;
 
   var timeArrayMonth = categoriesMonth
-    .replace(/\n/g, "") // Loại bỏ ký tự xuống dòng
-    .replace(/\s/g, "") // Loại bỏ khoảng trắng
+    .replace(/\n/g, "")
+    .replace(/\s/g, "")
     .split(",");
   var dataArrayMonth = dataMonth.split(",").map(Number);
   var revenueArrayMonth = revenueMonth.split(",").map(Number);
   //===========================================================
   console.log("tiem: ", timeArrayToday);
+
   document.addEventListener("DOMContentLoaded", () => {
-    const filterOptions = document.querySelectorAll(
+    const reports = document.getElementById("reports");
+    console.log(reports);
+    const filterOptions = reports.querySelectorAll(
       ".dropdown-menu .dropdown-item"
     );
+
     const reportsTitle = document.getElementById("reportsTitle");
 
     let apexChart;
