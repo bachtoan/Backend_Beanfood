@@ -16,6 +16,9 @@ const restaurantSchema = new mongoose.Schema(
     timeoff: String,
     email: String,
     phone: String,
+    totalEvaluate: { type: Number, default: 0 },
+    totalStar: { type: Number, default: 0 },
+    average: { type: Number, default: 0 },
   },
   {
     collection: "restaurants",

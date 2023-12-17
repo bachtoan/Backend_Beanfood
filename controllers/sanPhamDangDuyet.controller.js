@@ -104,7 +104,7 @@ exports.xoa = async (req, res, next) => {
   }
 };
 
-exports.xoa = async (req, res, next) => {
+exports.huy = async (req, res, next) => {
   const productId = req.params.id;
   console.log(productId);
 };
