@@ -12,9 +12,13 @@ exports.getNotifyById = async (req, res, next) => {
     return res.status(500).json({ msg: error.message });
   }
 };
-exports.postNotify = async (data) => {
+exports.postNotify = async (req, res) => {
+  const dt = {
+    idUser: req.body.userId,
+    money: req.body.toltalprice,
+  };
   try {
-    await notifyModel.notifyModel.create(data);
+    notifyModel.notifyModel.create(dt).then((dta) => {});
   } catch (error) {
     return res.status(500).json({ msg: error.message });
   }
