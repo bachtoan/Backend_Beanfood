@@ -181,7 +181,7 @@
                <a href="/donhang/${order._id}"><li>${order._id}</li></a>
             </ul>
           </td>
-          <td>${order.status === 3 ? "Hoàn thành" : "Chưa hoàn thành"}</td>
+          <td>${order.status === 3 ? "Hoàn thành" : "Đã hủy"}</td>
           <td>${new Date(order.time).toLocaleString()}</td>
         `;
       tableBody.appendChild(row);

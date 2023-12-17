@@ -14,7 +14,12 @@ var apiProduct = require("../controllers/product.controller");
 var apiSanPhamDangDuyet = require("../controllers/sanPhamDangDuyet.controller");
 var hisToryModel = require("../models/history");
 var apifavorite = require("../controllers/favoriteController");
+var apiNotify = require("../controllers/notify.controller");
+
 const upload = multer({ storage: multer.memoryStorage() });
+
+//notify
+router.get("/notify/:id", apiNotify.getNotifyById);
 
 //user
 router.get("/users", apiU.listUser);
@@ -142,6 +147,23 @@ router.post("/restaurant/delete/:id", apiRestaurant.deleteRestaurant);
 //products
 router.post("/product/delete/:id", apiProduct.ngungKinhDoanhProduct);
 router.get("/product/id/:id", apiProduct.getProduct);
+router.post("/search", async (req, res) => {
+  const dataRes = await apiProduct.dataProductRestaurant(req, res);
+  const data = dataRes.filter((dt, index) => dt.name.includes(req.body.search));
+  res.render("product/showProduct", {
+    list: data,
+    req: req,
+  });
+});
+router.post("/search/donhang", async (req, res) => {
+  const dataRes = await apiProduct.dataProductRestaurant(req, res);
+  const data = dataRes.filter((dt, index) => dt.name.includes(req.body.search));
+  res.render("product/showProduct", {
+    list: data,
+    req: req,
+  });
+});
+
 router.get("/product/suggest", apiProduct.getSuggest);
 router.post("/product/getbyname", apiProduct.getProductByName);
 router.get("/productDanhmuc/:category", apiProduct.getProductDanhMuc);

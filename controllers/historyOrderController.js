@@ -2,15 +2,16 @@ var historyModel = require("../models/history");
 const ProductModel = require("../models/product.model");
 const mongoose = require("mongoose");
 var userController = require("../models/users.model");
-var voucherModel=require("../models/voucher.model.js");
+var voucherModel = require("../models/voucher.model.js");
 var apiVoucher = require("../controllers/voucher.controller");
+var apiNotify = require("../controllers/notify.controller.js");
 
 const moment = require("moment");
 exports.createOrderSuccess = async (req, res, next) => {
   try {
     const OrderSuccess = new historyModel.History(req.body);
     const voucherId = req.body.voucherId;
-
+    await apiNotify.postNotify(req.body);
     if (voucherId) {
       const data = await apiVoucher.handleDecreseVoucher(req, res, next);
       if (data === 1) {
@@ -52,11 +53,13 @@ exports.getChiTiet = async (req, res) => {
     }
     const chiTietDonHang = await historyModel.History.findOne({
       _id: id,
-    }).populate({
-      path: "products.restaurantId",
-      select: "name",
-      model: "restaurantModel",
-    }).populate({ path: "voucherId", select: "money",model: "voucherModel"});
+    })
+      .populate({
+        path: "products.restaurantId",
+        select: "name",
+        model: "restaurantModel",
+      })
+      .populate({ path: "voucherId", select: "money", model: "voucherModel" });
     if (!chiTietDonHang) {
       return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
     }
