@@ -114,6 +114,10 @@ router.get("/Favorite", function (req, res, next) {
 });
 router.get("/listproduct", product.getListProduct);
 router.get("/adminRevenue", product.getRevenue);
+router.get("/dat/user/manage", (req, res) => {
+  res.render("user/user", { title: "Express", req: req });
+});
+
 router.get("/showrevenue", history.getRevenueRestaurant);
 router.get("/orderstatistics", order.getOrdersWeb);
 router.get("/censorship", sanPhamDangDuyet.getListProduct);

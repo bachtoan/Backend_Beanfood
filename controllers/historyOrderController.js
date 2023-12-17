@@ -11,14 +11,14 @@ exports.createOrderSuccess = async (req, res, next) => {
   try {
     const OrderSuccess = new historyModel.History(req.body);
     const voucherId = req.body.voucherId;
-    await apiNotify.postNotify(req.body);
-    if (voucherId) {
+    apiNotify.postNotify(req, res);
+    if (voucherId && voucherId !== "") {
       const data = await apiVoucher.handleDecreseVoucher(req, res, next);
-      if (data === 1) {
+      if (data == 1) {
         let new_OrderSuccess = await OrderSuccess.save();
         return res.status(200).json({ OrderSuccess: new_OrderSuccess });
       } else {
-        return res.status(500).json({ err: "Het voucher" });
+        return res.status(500).json({ err: "Co loi xay ra" });
       }
     } else {
       let new_OrderSuccess = await OrderSuccess.save();

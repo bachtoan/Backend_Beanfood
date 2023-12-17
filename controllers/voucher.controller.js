@@ -52,7 +52,7 @@ exports.decrease = async (req, res, next) => {
 };
 exports.getVoucherInRestaurant = async (req, res, next) => {
   const id = req.params.id;
-  console.log("data id" , id);
+  console.log("data id", id);
   try {
     const currentTime = moment();
     const list = await voucherModel.voucherModel.find({
@@ -86,27 +86,28 @@ exports.tinhtoansovoucherhethang = async (req, res, next) => {
 };
 exports.handleDecreseVoucher = async (req, res, next) => {
   const id = req.body.voucherId;
-
   const userId = req.body.userId;
   try {
     const voucher = await voucherModel.voucherModel.findById({ _id: id });
     if (!voucher) {
-      return res.status(404).json({ msg: "Voucher not found" });
+      return -1;
     }
     if (voucher.quantity == 0) {
       await voucherModel.voucherModel.findByIdAndDelete({ _id: id });
+
       return -1;
     }
     if (voucher.quantity > 0) {
       voucher.quantity--;
       voucher.idUser = [...(voucher.idUser ?? []), userId];
       await voucher.save();
+
       return 1;
     } else {
-      return res.status(400).json({ msg: "Voucher is out of stock" });
+      return -1;
     }
   } catch (error) {
-    return res.status(500).json({ msg: error.message });
+    return -1;
   }
 };
 exports.deleteVoucher = async (req, res, next) => {

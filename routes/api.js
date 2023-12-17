@@ -17,10 +17,8 @@ var apifavorite = require("../controllers/favoriteController");
 var apiNotify = require("../controllers/notify.controller");
 
 const upload = multer({ storage: multer.memoryStorage() });
-
 //notify
 router.get("/notify/:id", apiNotify.getNotifyById);
-
 //user
 router.get("/users", apiU.listUser);
 router.get("/users/info/:id", apiU.infoUser);

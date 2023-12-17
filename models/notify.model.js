@@ -3,13 +3,13 @@ var db = require("./db");
 
 const notifySchema = new mongoose.Schema(
   {
-    idProduct: { type: mongoose.Schema.ObjectId, ref: "productModel" },
-    
     idUser: { type: mongoose.Schema.ObjectId, ref: "userModel" },
+    money: Number,
+    image: String,
     title: String,
   },
   {
-    collection: "comments",
+    collection: "notifications",
     timestamps: true,
   }
 );
