@@ -65,7 +65,7 @@ const historySchame = new mongoose.Schema(
     },
     time: {
       type: Date,
-      require: true,
+      require: false,
     },
     voucherId: {
       type: mongoose.Types.ObjectId,

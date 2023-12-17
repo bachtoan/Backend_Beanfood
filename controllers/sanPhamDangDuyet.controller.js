@@ -105,9 +105,23 @@ exports.xoa = async (req, res, next) => {
 };
 
 exports.huy = async (req, res, next) => {
-  const productId = req.params.id;
-  console.log(productId);
+  try {
+    const productId = req.params.id;
+
+    const productToDelete =
+      await sanPhamDangDuyetModel.sanPhamDangDuyetModel.findById(productId);
+    if (!productToDelete) {
+      return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+    }
+    await sanPhamDangDuyetModel.sanPhamDangDuyetModel.deleteOne({
+      _id: productId,
+    });
+    res.redirect("back");
+  } catch (error) {
+    console.error(error);
+  }
 };
+
 exports.listForRes = async (req, res, next) => {
   try {
     const products = await sanPhamDangDuyetModel.sanPhamDangDuyetModel.find({
