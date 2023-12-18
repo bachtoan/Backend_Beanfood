@@ -14,9 +14,9 @@
             <th scope="col">Username</th>
             <th scope="col">Role</th>
             <th scope="col">Phone</th>
-            <th scope="col">Đơn đã mua</th>
-            <th scope="col" data-sort-type="number" data-sort-order="asc">Doanh thu ↑↓</th>
-            <th scope="col">Tạo tài khoản</th>
+            <th scope="col" style="text-align: right;">Đơn đã mua</th>
+            <th scope="col" data-sort-type="number" style="text-align: right;" data-sort-order="asc">Doanh thu ↑↓</th>
+            <th scope="col" style="text-align: right;">Tạo tài khoản</th>
           </tr>
         </thead>
         <tbody>
@@ -29,9 +29,9 @@
               </td>
               <td><%= user.role %></td>
               <td><%= user.phone %></td>
-              <td><%= user.count %></td>
-              <td><%= user.totalAmount %></td>
-              <td><%= user.timeSinceCreated %></td>
+              <td style="text-align: right;"><%= user.count %></td>
+              <td style="text-align: right;"><%= user.totalAmount %></td>
+              <td style="text-align: right;"><%= user.timeSinceCreated %></td>
             </tr>
           <% }); %>
         </tbody>

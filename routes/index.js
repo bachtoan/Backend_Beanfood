@@ -123,5 +123,6 @@ router.get("/censorship/duyet/:id", sanPhamDangDuyet.duyet);
 router.get("/censorship/xoa/:id", sanPhamDangDuyet.xoa);
 router.get("/getlistuser", sanPhamDangDuyet.getlistuser);
 router.get("/user/profile/:id", sanPhamDangDuyet.getUserProfile);
+router.get("/getContact", sanPhamDangDuyet.getContact);
 
 module.exports = router;

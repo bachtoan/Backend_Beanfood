@@ -246,3 +246,9 @@ exports.getUserProfile = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+exports.getContact = async (req, res, next) => {
+  res.render("contact/contact", {
+    req: req,
+  });
+};
