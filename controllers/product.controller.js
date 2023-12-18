@@ -128,13 +128,13 @@ exports.getProductByName = async (req, res, next) => {
   try {
     const products = await productModel.productModel
       .find({
-        name: { $regex: productName, $options: "i" },
+        name: { $regex: productName, $options: "simx" },
         isHide: false,
       })
       .populate("restaurantId");
 
     if (products.length === 0) {
-      return res.status(404).json({ msg: "Không tìm thấy sản phẩm nào." });
+      return res.json({ msg: "Không tìm thấy sản phẩm nào." });
     }
 
     res.status(200).json(products);
