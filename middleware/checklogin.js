@@ -1,14 +1,22 @@
-exports.yeu_cau_dang_nhap = (req, res, next) => {
+const sanPhamDangDuyetModel = require("../models/sanPhamDangDuyet.model");
+
+exports.yeu_cau_dang_nhap = async (req, res, next) => {
   if (req.session.user) {
     if (req.session.user.role === "user") {
-    console.log("đã đăng nhập user");
+      console.log("đã đăng nhập user");
       return res.render("index", {
         message: "Đã đăng nhập user",
         req: req,
       });
     }
     if (req.session.user.role === "admin") {
-    console.log("đã đăng nhập admin");
+      const latestProducts = await sanPhamDangDuyetModel.sanPhamDangDuyetModel
+        .find({ trangthai: 0 })
+        .sort({ createdAt: -1 })
+        .limit(5);
+      console.log(latestProducts);
+      req.session.choduyet = latestProducts;
+      console.log("đã đăng nhập admin");
       return res.render("index-admin", {
         message: "Đã đăng nhập admin",
         req: req,

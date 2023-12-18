@@ -34,7 +34,11 @@
               />
             </td>
             <td><%= list[i].description %></td>
-            <td><%= list[i].restaurantId %></td>
+            <td>
+              <a href="/res/profile/<%= list[i].restaurantId %>">
+                <%= list[i].restaurantName %>
+              </a>
+            </td>
             <td><%= list[i].realPrice %></td>
             <td><%= list[i].discountPrice %></td>
             <td><%= list[i].category %></td>

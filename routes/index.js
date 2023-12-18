@@ -113,15 +113,15 @@ router.get("/Favorite", function (req, res, next) {
   res.render("favorite/favorites", { title: "Express", req: req });
 });
 router.get("/listproduct", product.getListProduct);
+
 router.get("/adminRevenue", product.getRevenue);
-router.get("/dat/user/manage", (req, res) => {
-  res.render("user/user", { title: "Express", req: req });
-});
 
 router.get("/showrevenue", history.getRevenueRestaurant);
 router.get("/orderstatistics", order.getOrdersWeb);
 router.get("/censorship", sanPhamDangDuyet.getListProduct);
 router.get("/censorship/duyet/:id", sanPhamDangDuyet.duyet);
 router.get("/censorship/xoa/:id", sanPhamDangDuyet.xoa);
+router.get("/getlistuser", sanPhamDangDuyet.getlistuser);
+router.get("/user/profile/:id", sanPhamDangDuyet.getUserProfile);
 
 module.exports = router;

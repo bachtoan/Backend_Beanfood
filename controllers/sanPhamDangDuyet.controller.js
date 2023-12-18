@@ -2,6 +2,8 @@ var sanPhamDangDuyetModel = require("../models/sanPhamDangDuyet.model.js");
 const firebase = require("../firebase/index.js");
 const { productModel } = require("../models/product.model.js");
 var restaurantModel = require("../models/restaurant.model");
+const userModel = require("../models/users.model.js");
+var historyModel = require("../models/history");
 
 exports.addProduct = async (req, res, next) => {
   const id = req.session.user?._id;
@@ -143,5 +145,104 @@ exports.listForRes = async (req, res, next) => {
     });
   } catch (error) {
     return res.status(204).json({ msg: error.message });
+  }
+};
+
+exports.getlistuser = async (req, res, next) => {
+  try {
+    const users = await userModel.userModel.find();
+
+    // Sử dụng Promise.all để chờ tất cả các promises hoàn thành
+    const usersWithTimeSinceCreated = await Promise.all(
+      users.map(async (user) => ({
+        ...user.toObject(),
+        timeSinceCreated: calculateTimeSinceCreated(user.createdAt),
+        count: await getBoughtCount(user._id),
+        totalAmount: await getBoughtTotalAmount(user._id),
+      }))
+    );
+
+    res.render("usersview/user", {
+      list: usersWithTimeSinceCreated,
+      req: req,
+    });
+  } catch (error) {
+    console.error("Error fetching user list:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+// Hàm tính thời gian từ ngày tạo đến hiện tại
+function calculateTimeSinceCreated(createdAt) {
+  const createdAtDate = new Date(createdAt);
+  const currentDate = new Date();
+
+  const timeDifference = currentDate - createdAtDate;
+  const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+  return daysDifference + " ngày trước";
+}
+
+async function getBoughtCount(userId) {
+  try {
+    // Truy vấn trong bảng bills để lấy số lượng hóa đơn với status = 3
+    const count = await historyModel.History.countDocuments({
+      userId: userId,
+      status: 3,
+    });
+
+    return count;
+  } catch (error) {
+    console.error("Error counting bills:", error);
+    throw error;
+  }
+}
+
+async function getBoughtTotalAmount(userId) {
+  try {
+    const records = await historyModel.History.find({
+      userId: userId,
+      status: 3,
+    });
+
+    // Cộng tổng toltalprice từ mảng records
+    const totalAmount = records.reduce(
+      (total, record) => total + record.toltalprice,
+      0
+    );
+
+    return totalAmount;
+  } catch (error) {
+    console.error("Error getting total amount:", error);
+    throw error;
+  }
+}
+exports.getUserProfile = async (req, res, next) => {
+  console.log(req.params.id);
+
+  try {
+    // Lấy thông tin user từ userModel
+    const user = await userModel.userModel.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Truy vấn các đơn mua thành công từ historyModel
+    const successfulOrders = await historyModel.History.find({
+      userId: req.params.id,
+      status: 3,
+    });
+
+    res.render("usersview/userProfile", {
+      user: user,
+      orders: successfulOrders,
+      count: await getBoughtCount(user._id),
+      totalAmount: await getBoughtTotalAmount(user._id),
+      req: req,
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

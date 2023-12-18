@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
 var db = require("./db");
+const timestamp = require("mongoose-timestamp");
 
 const historySchame = new mongoose.Schema(
   {

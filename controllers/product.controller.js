@@ -1,11 +1,14 @@
 var productModel = require("../models/product.model");
 var restaurantModel = require("../models/restaurant.model");
+var userModel = require("../models/users.model.js");
+
 const { History } = require("../models/history.js");
 const firebase = require("../firebase/index.js");
 process.env.TZ = "Asia/Ho_Chi_Minh";
 const moment = require("moment-timezone");
 const { error } = require("firebase-functions/logger");
 const evaluteModel = require("../models/evaluate.js");
+const { logger } = require("firebase-functions/v1");
 
 exports.getSuggest = async (req, res, next) => {
   try {
@@ -195,7 +198,6 @@ exports.addProduct = async (req, res, next) => {
 };
 
 // web
-
 exports.getListProduct = async (req, res, next) => {
   try {
     const listrestaurant = await restaurantModel.restaurantModel.find();
@@ -215,8 +217,11 @@ exports.getListProduct = async (req, res, next) => {
     ) {
       productsQuery.restaurantId = req.query.restaurantFilter.trim();
     }
-
-    const itemsPerPage = 5;
+    if (req.query.name && req.query.name.trim() !== "") {
+      // Sử dụng biểu thức chính quy để tìm kiếm sản phẩm theo tên
+      productsQuery.name = { $regex: new RegExp(req.query.name.trim(), "i") };
+    }
+    const itemsPerPage = 15;
     const page = parseInt(req.query.page) || 1;
 
     const totalCount = await productModel.productModel.countDocuments(
@@ -308,18 +313,30 @@ exports.getProductDanhMuc = async (req, res, next) => {
 
 exports.getRevenue = async (req, res, next) => {
   const currentDate = moment().startOf("day");
-  const startOfToday = currentDate.toISOString();
+  moment.tz.setDefault("Asia/Ho_Chi_Minh");
+
+  // Lấy thời gian hiện tại
+  const currentDate2 = moment();
+
+  // Lấy đầu ngày của ngày hiện tại
+  const startOfToday = currentDate2
+    .startOf("day")
+    .format("YYYY-MM-DDTHH:mm:ssZ");
   const startOfThisMonth = moment().startOf("month").toISOString();
   const startOfThisYear = moment().startOf("year").toISOString();
 
   try {
-    // Lấy các hóa đơn trong ngày có status = 4
-    const billsToday = await History.find({
-      time: { $gte: startOfToday },
-      status: 3,
-    });
+    const datePart = startOfToday.split("T")[0];
+    const bills = await History.find({ status: 3 });
+    const billsToday = [];
+    for (const bill of bills) {
+      // Cắt chuỗi trường time của bản ghi
+      const billDatePart = bill.time.toISOString().split("T")[0];
+      if (billDatePart === datePart) {
+        billsToday.push(bill);
+      }
+    }
     const dataForChartToday = organizeDataByHour(billsToday);
-
     // Lấy các hóa đơn trong tháng có status = 4
     const billsThisMonth = await History.find({
       time: { $gte: startOfThisMonth },
@@ -362,7 +379,6 @@ exports.getRevenue = async (req, res, next) => {
         isNaN(bill.toltalprice) ? total : total + bill.toltalprice,
       0
     );
-    console.log("sss", dataForChartToday.revenue);
     res.render("revenue/adminRevenue", {
       req: req,
       bills: billsToday,
@@ -375,13 +391,16 @@ exports.getRevenue = async (req, res, next) => {
       totalRevenueThisMonth: totalRevenueThisMonth,
       totalRevenueThisYear: totalRevenueThisYear,
 
-      categoriesToday: dataForChartToday.categories,
+      categoriesToday: dataForChartToday.formattedDateArray,
       dataToday: dataForChartToday.data,
       revenueToday: dataForChartToday.revenue,
 
       categoriesMonth: dataForChartMonth.categories,
       dataMonth: dataForChartMonth.data,
       revenueMonth: dataForChartMonth.revenue,
+
+      topSelling: topSelling(bills),
+      recent: await recent(bills),
     });
   } catch (error) {
     console.error("Lỗi khi lấy dữ liệu từ bảng Bill:", error);
@@ -390,46 +409,55 @@ exports.getRevenue = async (req, res, next) => {
 };
 
 function organizeDataByHour(bills) {
-  const roundedTimes = bills.map((bill) => {
-    const time = new Date(bill.time);
-    const roundedTime = new Date(
-      time.getFullYear(),
-      time.getMonth(),
-      time.getDate(),
-      Math.floor(time.getHours() / 2) * 2
-    );
-    const revenue = parseFloat(bill.toltalprice) || 0; // Chuyển đổi thành số và mặc định là 0 nếu không phải số
-    return { time: roundedTime, revenue, count: 1 };
-  });
-
-  roundedTimes.sort((a, b) => a.time - b.time);
-
+  const organizedData = {};
+  const categories = [];
   const data = [];
+  const revenue = [];
 
-  roundedTimes.forEach((roundedTime) => {
-    const hourKey = roundedTime.time.toISOString();
-    const existingData = data.find((item) => item.time === hourKey);
+  bills.forEach((bill) => {
+    // Lấy giờ từ trường time
+    const hour = new Date(bill.time).getHours();
 
-    if (existingData) {
-      existingData.count += roundedTime.count;
-      existingData.revenue += roundedTime.revenue;
-    } else {
-      data.push({
-        time: hourKey,
-        count: roundedTime.count,
-        revenue: roundedTime.revenue,
-      });
+    // Tạo khung giờ nếu chưa tồn tại
+    if (!organizedData[hour]) {
+      organizedData[hour] = {
+        bills: [],
+        billCount: 0,
+        totalPrices: 0,
+      };
+    }
+
+    // Thêm bill vào khung giờ tương ứng
+    organizedData[hour].bills.push(bill);
+    organizedData[hour].billCount += 1;
+    organizedData[hour].totalPrices += bill.toltalprice;
+
+    // Thêm giờ vào mảng categories nếu chưa tồn tại
+    if (!categories.includes(hour)) {
+      categories.push(hour);
     }
   });
 
-  data.sort((a, b) => new Date(a.time) - new Date(b.time));
-  const valuesForChart = data.map((item) => item.count);
+  // Sắp xếp mảng categories để đảm bảo thứ tự tăng dần
+  categories.sort((a, b) => a - b);
 
-  return {
-    categories: data.map((item) => item.time),
-    data: valuesForChart,
-    revenue: data.map((item) => item.revenue),
-  };
+  // Đổ dữ liệu vào mảng data và revenue theo thứ tự categories
+  categories.forEach((hour) => {
+    data.push(organizedData[hour].billCount);
+    revenue.push(organizedData[hour].totalPrices);
+  });
+
+  const formattedCategories = categories.map((hour) => {
+    const formattedHour = (hour - 7 + 24) % 24;
+    return formattedHour.toString().padStart(2, "0") + ":00";
+  });
+  const currentDate = "2023-12-18";
+
+  // Chuyển đổi thành mảng mới với chuỗi
+  const formattedDateArray = formattedCategories.map((hour) => {
+    return `${currentDate}T${hour}:00.000Z`;
+  });
+  return { formattedDateArray, data, revenue };
 }
 
 function organizeDataByMonth(bills) {
@@ -463,4 +491,110 @@ function organizeDataByMonth(bills) {
       .reduce((total, bill) => total + bill.toltalprice, 0)
   );
   return { categories, data, revenue };
+}
+
+function topSelling(bills) {
+  const productInfo = {};
+
+  // Lặp qua tất cả các hóa đơn
+  for (const bill of bills) {
+    // Lặp qua tất cả các sản phẩm trong hóa đơn
+    for (const product of bill.products) {
+      const productId = product.productId.toString(); // Chuyển ObjectId thành chuỗi để sử dụng làm khóa
+
+      // Tăng số lần xuất hiện của productId
+      if (productInfo[productId]) {
+        productInfo[productId].quantity += product.quantity;
+        productInfo[productId].totalRevenue += product.price * product.quantity;
+      } else {
+        productInfo[productId] = {
+          name: product.name,
+          quantity: product.quantity,
+          totalRevenue: product.price * product.quantity,
+          imageURL: product.image, // Thêm link ảnh
+          price: product.price, // Thêm giá tiền
+        };
+      }
+    }
+  }
+
+  // Sắp xếp productInfo theo số lần xuất hiện giảm dần
+  const sortedProducts = Object.keys(productInfo).sort(
+    (a, b) => productInfo[b].quantity - productInfo[a].quantity
+  );
+
+  // Lấy ra thông tin của 10 sản phẩm xuất hiện nhiều nhất
+  const topProducts = sortedProducts.slice(0, 10).map((productId) => ({
+    name: productInfo[productId].name,
+    quantity: productInfo[productId].quantity,
+    totalRevenue: productInfo[productId].totalRevenue,
+    imageURL: productInfo[productId].imageURL, // Link ảnh
+    price: productInfo[productId].price, // Giá tiền
+  }));
+  return topProducts;
+}
+
+async function recent(bills) {
+  try {
+    // Sắp xếp mảng bills theo thời gian giảm dần
+    const sortedBills = bills.sort(
+      (a, b) => new Date(b.time) - new Date(a.time)
+    );
+
+    // Chọn 6 phần tử đầu tiên
+    const recentBills = sortedBills.slice(0, 6);
+
+    // Lấy thông tin cần thiết từ mỗi đơn hàng
+    const result = await Promise.all(
+      recentBills.map(async (bill) => {
+        // Lấy tên món ăn từ sản phẩm đầu tiên của đơn hàng
+        const productName = bill.products[0].name;
+
+        // Lấy thông tin người dùng từ userModel
+        const user = await userModel.userModel.findById(bill.userId);
+        const userName = user ? user.username : null;
+
+        // Lấy thông tin nhà hàng từ restaurantsModel
+        const restaurant = await restaurantModel.restaurantModel.findById(
+          bill.products[0].restaurantId
+        );
+        const restaurantName = restaurant ? restaurant.name : null;
+
+        // Định dạng thời gian
+        const timeAgo = getTimeAgo(bill.time);
+
+        return {
+          productName,
+          restaurantName,
+          userName,
+          time: timeAgo,
+        };
+      })
+    );
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.error("Error in recent function:", error);
+    return [];
+  }
+}
+function getTimeAgo(timeString) {
+  const currentTime = new Date();
+  currentTime.setHours(currentTime.getHours() + 7);
+  const postTime = new Date(timeString);
+  const timeDifference = Math.floor((currentTime - postTime) / 1000); // Chuyển đổi sang giây
+
+  const minutes = Math.floor(timeDifference / 60);
+  const hours = Math.floor(timeDifference / 3600);
+  const days = Math.floor(timeDifference / 86400);
+
+  if (minutes < 1) {
+    return "Vừa xong";
+  } else if (minutes < 60) {
+    return `${minutes} phút`;
+  } else if (hours < 24) {
+    return `${hours} giờ`;
+  } else {
+    return `${days} ngày`;
+  }
 }

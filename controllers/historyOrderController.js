@@ -9,7 +9,12 @@ var apiNotify = require("../controllers/notify.controller.js");
 const moment = require("moment");
 exports.createOrderSuccess = async (req, res, next) => {
   try {
-    const OrderSuccess = new historyModel.History(req.body);
+    const date = new Date();
+    date.setHours(date.getHours() + 7);
+    const OrderSuccess = new historyModel.History({
+      ...req.body,
+      time: date,
+    });
     const voucherId = req.body.voucherId;
     apiNotify.postNotify(req, res);
     if (voucherId && voucherId !== "") {

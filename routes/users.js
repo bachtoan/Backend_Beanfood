@@ -12,4 +12,5 @@ router.get("/", function (req, res, next) {
 router.post("/signup", restaurant.webregister);
 router.post("/login", restaurant.weblogin);
 router.get("/logout", restaurant.weblogout);
+
 module.exports = router;
